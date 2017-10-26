@@ -1,11 +1,11 @@
 {
   "name": "jquery-google-maps",
+  "version": "0.0.1",
   "description": "Google Maps JS",
   "keywords": [
-    "gmaps",
+    "jquery-google-maps",
     "google-maps",
-    "google-maps-js",
-    "jquery-google-maps"
+    "gmaps"
   ],
   "main": "dist/js/google-maps.js",
   "dependencies": {
