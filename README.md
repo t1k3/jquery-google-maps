@@ -3,7 +3,7 @@ Work in progress
 
 ## Installation
 ```bash
-npm install --save-dev t1k3/jquery-google-maps
+npm install --save-dev jquery-google-maps
 ```
 
 ## Options
