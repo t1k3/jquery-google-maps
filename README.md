@@ -3,7 +3,7 @@ Work in progress
 
 ## Installation
 ```bash
-npm install https://github.com/t1k3hu/jquery-google-maps 
+npm install --save-dev https://github.com/t1k3hu/jquery-google-maps 
 # npm install --save-dev jquery-google-maps
 ```
 
