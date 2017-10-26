@@ -1,0 +1,27 @@
+.btn-gmaps {
+    background-clip: padding-box;
+    background-color: rgb(255, 255, 255);
+    border-radius: 2px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+    color: rgb(86, 86, 86);
+    cursor: pointer;
+    min-height: 18px;
+    min-width: 18px;
+    line-height: 18px;
+    padding: 5px;
+    text-align: center;
+    user-select: none;
+    -webkit-background-clip: padding-box;
+}
+
+btn-gmaps:hover {
+    color: #000;
+}
+
+.margin-bottom-10 {
+    margin-bottom: 10px;
+}
+
+.margin-right-10 {
+    margin-right: 10px;
+}

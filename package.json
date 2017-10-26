@@ -1,0 +1,21 @@
+{
+  "name": "jquery-google-maps",
+  "description": "Google Maps JS",
+  "keywords": [
+    "gmaps",
+    "google-maps",
+    "google-maps-js",
+    "jquery-google-maps"
+  ],
+  "main": "dist/js/google-maps.js",
+  "dependencies": {
+    "dom-to-image": "^2.6.0",
+    "fontawesome": "^4.7.2",
+    "jquery": "^3.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  }
+}
