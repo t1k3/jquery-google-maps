@@ -142,10 +142,47 @@ GoogleMaps.prototype.showLocation = function () {
     }
 };
 
+GoogleMaps.prototype.printDOM = function () {
+    var $body = $('body');
+    var $mapContainer = $(this.options.div);
+    var $mapContainerParent = $mapContainer.parent();
+    var $printContainer = $('<div style="position: relative;">');
+
+    $printContainer
+        .height($mapContainer.height())
+        .append($mapContainer)
+        .prependTo($body);
+
+    var $content = $body
+        .children()
+        .not($printContainer)
+        .not('script')
+        .detach();
+
+    var $patchedStyle = $('<style media="print">')
+        .text(
+            'img { max-width: none !important; }' +
+            'a[href]:after { content: ""; }' +
+            '.btn-gmaps { display: none !important; }'
+        )
+        .appendTo('head');
+
+    window.print();
+
+    $body.prepend($content);
+    $mapContainerParent.prepend($mapContainer);
+    $printContainer.remove();
+    $patchedStyle.remove();
+};
+
 GoogleMaps.prototype.print = function () {
+    this.printDOM();
+    return true;
+
     var self = this;
     var $mapContainer = $(self.options.div).find('iframe').closest('div').first();
 
+    // TODO FIXME
     /*html2canvas($mapContainer, {
         useCORS: true,
         allowTaint: false,
@@ -159,7 +196,8 @@ GoogleMaps.prototype.print = function () {
         }
     });*/
 
-    domtoimage.toPng($mapContainer[0], {
+    // TODO FIXME
+    /*domtoimage.toPng($mapContainer[0], {
         width: $mapContainer.width(),
         height: $mapContainer.height()
     })
@@ -171,7 +209,7 @@ GoogleMaps.prototype.print = function () {
         .catch(function (error) {
             console.error('oops, something went wrong!', error);
             // swal(Lang.get('text.gmaps_not_printable.title'), Lang.get('text.gmaps_not_printable.description'), 'error');
-        });
+        });*/
 };
 
 GoogleMaps.prototype.getRandomPoint = function (coordinate) {
