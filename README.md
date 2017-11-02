@@ -23,8 +23,9 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 ```
 
 ```js
-    import "dom-to-image"; // printable
+    // import "dom-to-image"; // printable
     import 'font-awesome/css/font-awesome.min.css'; // btns: printable, locationable, streetviewable
+    import "js-marker-clusterer";
     
     import "jquery-google-maps/dist/css/google-maps.css";
     import "jquery-google-maps";
@@ -44,7 +45,7 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
         streetViewControl: true,
     });
     
-    gmaps.addMarker({lat: 47.50706, lng: 19.046351}, {
+    gmaps.addMarker({lat: 47.50706, lng: 19.047991}, {
         infoWindow: "<b>Palace of Parliament Hungary</b>",
     });
     
@@ -57,7 +58,7 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 * fitZoom()
 * addMarker(latlng, options)
 ```js
-    gmaps.addMarker({lat: 47.50706, lng: 19.046351}, {
+    gmaps.addMarker({lat: 47.50706, lng: 19.047991}, {
         infoWindow: "<b>Palace of Parliament Hungary</b>",
     });
 ```
