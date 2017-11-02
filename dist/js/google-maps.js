@@ -212,8 +212,13 @@ function GoogleMaps(options) {
 
     // variables
     this.options = options;
-    this.options.printable = typeof(options.printable) != 'undefined' ? options.printable : true;
+    this.options.fullscreenControl = typeof(options.fullscreenControl) != 'undefined' ? options.fullscreenControl : false;
+    this.options.streetViewControl = typeof(options.streetViewControl) != 'undefined' ? options.streetViewControl : false;
+    this.options.gestureHandling = typeof(options.gestureHandling) != 'undefined' ? options.gestureHandling : 'cooperative';
+
+    this.options.printable = typeof(options.printable) != 'undefined' ? options.printable : false;
     this.options.locationable = typeof(options.locationable) != 'undefined' ? options.locationable : false;
+    this.options.streetviewable = typeof(options.streetviewable) != 'undefined' ? options.streetviewable : false;
     this.bounds = new google.maps.LatLngBounds();
 
     this.objects = {
@@ -230,13 +235,17 @@ function GoogleMaps(options) {
 
     this.drawingManager = null;
 
+    this.panorama = null;
+
     // init
     // document.getElementById('map'), $('#map');
     this.map = new google.maps.Map($(this.options.div)[0], {
         center: this.options.latlng,
         zoom: this.options.zoom || 8,
         mapTypeId: this.options.type || 'hybrid',
-        fullscreenControl: true
+        fullscreenControl: this.options.fullscreenControl,
+        streetViewControl: this.options.streetViewControl,
+        gestureHandling: this.options.gestureHandling,
     });
 
     if (this.options.printable) {
@@ -259,6 +268,18 @@ function GoogleMaps(options) {
         });
     }
 
+    if (this.options.streetviewable) {
+        var $streetViewBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" id="map-street-view"><i class="fa fa-street-view"></i></div>');
+        $(this.options.div).prepend($streetViewBtn);
+        this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($streetViewBtn[0]);
+
+        google.maps.event.addDomListener($streetViewBtn[0], 'click', function (event) {
+            self.toggleStreetView();
+        });
+
+        self.setPanorama();
+    }
+
 
     // events
     google.maps.event.addListener(this.map, 'zoom_changed', function (event) {
@@ -270,6 +291,23 @@ function GoogleMaps(options) {
     });
 
     $.extend(this.options, options);
+};
+
+GoogleMaps.prototype.setPanorama = function (latlng) {
+    var self = this;
+    latlng = latlng || self.options.latlng;
+
+    self.panorama = self.map.getStreetView();
+    self.panorama.setPosition(latlng);
+    self.panorama.setPov(({
+        heading: 265,
+        pitch: 0
+    }));
+};
+
+GoogleMaps.prototype.toggleStreetView = function () {
+    var self = this;
+    self.panorama.setVisible(!self.panorama.getVisible());
 };
 
 GoogleMaps.prototype.showLocation = function () {

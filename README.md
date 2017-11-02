@@ -19,12 +19,12 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 
 ## How to init
 ```html
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&v=3.27&libraries=geometry,drawing"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=geometry,drawing"></script>
 ```
 
 ```js
     import "dom-to-image"; // printable
-    import 'font-awesome/css/font-awesome.min.css'; // btns: printable, locationable
+    import 'font-awesome/css/font-awesome.min.css'; // btns: printable, locationable, streetviewable
     
     import "jquery-google-maps/dist/css/google-maps.css";
     import "jquery-google-maps";
@@ -34,8 +34,14 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
         latlng: {lat: 47.157562, lng: 18.3847344},
         zoom: 8,
         type: "roadmap",
+        
         locationable: true,
+        streetviewable: true,
         printable: false,
+        
+        gestureHandling: "cooperative", // "none", "greedy", "cooperative"
+        fullscreenControl: true,
+        streetViewControl: true,
     });
     
     gmaps.addMarker({lat: 47.50706, lng: 19.046351}, {
