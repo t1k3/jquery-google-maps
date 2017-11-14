@@ -150,9 +150,9 @@ GoogleMaps.prototype.showLocation = function () {
     }
 };
 
-// Simple dom print
-GoogleMaps.prototype.printDOM = function () {
-    console.log('printDOM');
+// Print
+GoogleMaps.prototype.print = function () {
+    console.log('print');
 
     var $body = $('body');
     var $mapContainer = $(this.options.div);
@@ -174,7 +174,8 @@ GoogleMaps.prototype.printDOM = function () {
         .text(
             'img { max-width: none !important; }' +
             'a[href]:after { content: ""; }' +
-            '.btn-gmaps { display: none !important; }'
+            '.btn-gmaps { display: none !important; }' +
+            this.options.div + ' { width: 100%; height: 100%; }'
         )
         .appendTo('head');
 
@@ -184,46 +185,6 @@ GoogleMaps.prototype.printDOM = function () {
     $mapContainerParent.prepend($mapContainer);
     $printContainer.remove();
     $patchedStyle.remove();
-};
-
-// Print
-GoogleMaps.prototype.print = function () {
-    console.log('print');
-
-    this.printDOM();
-    return true;
-
-    var self = this;
-    var $mapContainer = $(self.options.div).find('iframe').closest('div').first();
-
-    // TODO FIXME
-    /*html2canvas($mapContainer, {
-        useCORS: true,
-        allowTaint: false,
-        width: $mapContainer.width(),
-        height: $mapContainer.height(),
-        onrendered: function(canvas) {
-            var dataUrl = canvas.toDataURL('image/png');
-            var img = '<img src="' + dataUrl + '" height="auto" width="auto" onload="window.focus(); window.print(); window.close();" />';
-            var popup = window.open('about:blank', '_blank');
-            popup.document.write(img);
-        }
-    });*/
-
-    // TODO FIXME
-    /*domtoimage.toPng($mapContainer[0], {
-        width: $mapContainer.width(),
-        height: $mapContainer.height()
-    })
-        .then(function (dataUrl) {
-            var img = '<img src="' + dataUrl + '" height="auto" width="auto" onload="window.focus(); window.print(); window.close();" />';
-            var popup = window.open('about:blank', '_blank');
-            popup.document.write(img);
-        })
-        .catch(function (error) {
-            console.error('oops, something went wrong!', error);
-            // swal(Lang.get('text.gmaps_not_printable.title'), Lang.get('text.gmaps_not_printable.description'), 'error');
-        });*/
 };
 
 // Get random point in polygon

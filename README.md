@@ -23,11 +23,10 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 ```
 
 ```js
-    // import "dom-to-image"; // printable
     import 'font-awesome/css/font-awesome.min.css'; // btns: printable, locationable, streetviewable
     import "js-marker-clusterer";
     
-    import "jquery-google-maps/dist/css/google-maps.css";
+    import "jquery-google-maps/dist/css/google-maps.min.css";
     import "jquery-google-maps";
     
     var gmaps = new GoogleMaps({
@@ -67,8 +66,6 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 - [ ] Documentation
 - [ ] Documentation: Options
 - [ ] Documentation: Methods
-- [ ] Printable
-- [ ] CSS build
 - [ ] Refactor
 
 ## Credits
