@@ -1,5 +1,5 @@
-require("./google-maps-extend");
-require("./google-maps-custom-marker");
-// require("js-marker-clusterer/src/markerclusterer_compiled");
+require('./google-maps-extend');
+window.CustomMarker = require('./google-maps-custom-marker');
+window.GoogleMaps = require('./google-maps');
 
-window.GoogleMaps = require("./google-maps");
+// require("js-marker-clusterer/src/markerclusterer_compiled");

@@ -1,5 +1,15 @@
+// Add custom getBounds method
+google.maps.Polygon.prototype.getBounds = function () {
+    var bounds = new google.maps.LatLngBounds();
+    this.getPath().forEach(function (element, index) {
+        bounds.extend(element);
+    });
+
+    return bounds;
+};
+
 // Add center calculation method
-google.maps.Polygon.prototype.getApproximateCenter = function() {
+google.maps.Polygon.prototype.getApproximateCenter = function () {
     var boundsHeight = 0,
         boundsWidth = 0,
         centerPoint,
@@ -20,7 +30,7 @@ google.maps.Polygon.prototype.getApproximateCenter = function() {
         return centerPoint;
     } else {
         maxSearchLoops = maxSearchSteps / 2;
-        
+
         // Calculate NorthWest point so we can work out height of polygon NW->SE
         northWest = new google.maps.LatLng(polygonBounds.getNorthEast().lat(), polygonBounds.getSouthWest().lng());
 
@@ -57,6 +67,6 @@ google.maps.Polygon.prototype.getApproximateCenter = function() {
             }
         }
 
-        return(testPos);
+        return (testPos);
     }
 };

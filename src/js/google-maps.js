@@ -6,6 +6,8 @@ function GoogleMaps(options) {
 
     this.options.latlng = typeof(options.latlng) != 'undefined' ? options.latlng : {lat: 47.1556941, lng: 18.3847734};
 
+    this.options.hideCustomMarkers = typeof(options.hideCustomMarkers) != 'undefined' ? options.hideCustomMarkers : false;
+
     this.options.fullscreenControl = typeof(options.fullscreenControl) != 'undefined' ? options.fullscreenControl : false;
     this.options.streetViewControl = typeof(options.streetViewControl) != 'undefined' ? options.streetViewControl : false;
     this.options.gestureHandling = typeof(options.gestureHandling) != 'undefined' ? options.gestureHandling : 'cooperative';
@@ -76,10 +78,12 @@ function GoogleMaps(options) {
 
     // events
     google.maps.event.addListener(this.map, 'zoom_changed', function (event) {
-        if (self.map.zoom <= 11) {
-            self.hideCustomMarkers();
-        } else if (self.map.zoom >= 12) {
-            self.showCustomMarkers();
+        if (self.options.hideCustomMarkers) {
+            if (self.map.zoom <= 11) {
+                self.hideCustomMarkers();
+            } else if (self.map.zoom >= 12) {
+                self.showCustomMarkers();
+            }
         }
     });
 
@@ -396,7 +400,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
             position: latlng,
             map: this.map,
             draggable: options.draggable || false,
-            icon: typeof(icon) !== 'undefined' ? icon : '' // 'http://maps.google.com/mapfiles/ms/micons/green.png'
+            icon: typeof(icon) !== 'undefined' ? icon : '' // 'https://maps.google.com/mapfiles/ms/micons/green.png'
         });
 
         // this.objects.markers.push(marker);
@@ -456,7 +460,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
 
     if (typeof(options.label) !== 'undefined') {
         var customMarker = new CustomMarker(
-            polygon.getApproximateCenter(), // polygon.getBounds().getCenter(), 
+            polygon.getApproximateCenter(), // polygon.getBounds().getCenter(),
             this.map,
             {
                 content: options.label
@@ -559,7 +563,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         },
         markerOptions: {
             draggable: true,
-            icon: options.icon || 'http://maps.google.com/mapfiles/ms/micons/red.png'
+            icon: options.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png'
         },
         polygonOptions: {
             strokeColor: options.strokeColor || '#F75C54',
