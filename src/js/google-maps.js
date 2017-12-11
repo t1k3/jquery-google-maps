@@ -330,7 +330,7 @@ GoogleMaps.prototype.coordinates2paths = function (coordinates) {
 // Push to object (example: this.options.markers)
 GoogleMaps.prototype.push2object = function (str, value) {
     var obj = this.walkObject(this.objects, str);
-    obj.push(value);
+    if(obj) obj.push(value);
 };
 
 GoogleMaps.prototype.walkObject = function (obj, str) {
@@ -339,8 +339,10 @@ GoogleMaps.prototype.walkObject = function (obj, str) {
      obj = obj[array[i]];
      }
      return obj;*/
+
     return str.split(".").reduce(function (o, x) {
-        return o[x]
+        if (typeof(o[x]) === 'undefined') o[x] = [];
+        return o[x];
     }, obj);
 }
 
