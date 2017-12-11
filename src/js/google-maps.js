@@ -174,9 +174,10 @@ GoogleMaps.prototype.print = function () {
         .not('script')
         .detach();
 
-    var $patchedStyle = $('<style media="print">')
+    var $patchedStyle = $('<style media="print" id="gmaps-print-style">')
         .text(
             'img { max-width: none !important; }' +
+            'img.gm-fullscreen-control { display: none !important; }' +
             'a[href]:after { content: ""; }' +
             '.btn-gmaps { display: none !important; }' +
             this.options.div + ' { width: 100%; height: 100%; }'
@@ -330,7 +331,7 @@ GoogleMaps.prototype.coordinates2paths = function (coordinates) {
 // Push to object (example: this.options.markers)
 GoogleMaps.prototype.push2object = function (str, value) {
     var obj = this.walkObject(this.objects, str);
-    if(obj) obj.push(value);
+    if (obj) obj.push(value);
 };
 
 GoogleMaps.prototype.walkObject = function (obj, str) {

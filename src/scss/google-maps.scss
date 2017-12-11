@@ -19,11 +19,12 @@
 }
 
 .custom-marker {
-  color: #fff;
+  color: #2A2A2A;
   font-size: 12px;
+  font-weight: 600;
   max-width: 150px;
   text-align: center;
-  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+  text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
 }
 
 .margin-bottom-10 {
@@ -36,4 +37,11 @@
 
 .margin-top-10 {
   margin-top: 10px;
+}
+
+@media print {
+  .custom-marker {
+    -webkit-filter: drop-shadow(-1px 0 #fff);
+    text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
+  }
 }
