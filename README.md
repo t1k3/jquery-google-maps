@@ -25,6 +25,7 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 ```js
     import 'font-awesome/css/font-awesome.min.css'; // btns: printable, locationable, streetviewable
     import "js-marker-clusterer";
+    import "jquery.session";
     
     import "jquery-google-maps/dist/css/google-maps.min.css";
     import "jquery-google-maps";

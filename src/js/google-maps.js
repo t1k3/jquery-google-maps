@@ -256,8 +256,8 @@ GoogleMaps.prototype.setLocation = function () {
                     drawingControl: false,
                 });
 
-                $('input[name=lat]').val(latlng.lat);
-                $('input[name=lng]').val(latlng.lng);
+                if ($('[name="lat"]').length) $('[name="lat"]').val(latlng.lat);
+                if ($('[name="lng"]').length) $('[name="lng"]').val(latlng.lng);
 
                 console.log('success', latlng);
             },
@@ -553,6 +553,19 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     var options = options || {};
     options.drawingModes = options.drawingModes || ['marker', 'polygon'];
 
+    var polylineArrowOptions = {};
+    if ((index = options.drawingModes.indexOf('polyline-arrow')) >= 0) {
+        options.drawingModes.splice(index, 1);
+
+        if ((index = options.drawingModes.indexOf('polyline')) < 0) options.drawingModes.push('polyline');
+        polylineArrowOptions = {
+            icons: [{
+                icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
+                offset: '100%',
+            }]
+        };
+    }
+
     drawingManager = self.drawingManager = new google.maps.drawing.DrawingManager({
         // drawingMode: google.maps.drawing.OverlayType.MARKER,
         drawingMode: options.drawingModes[0],
@@ -575,14 +588,27 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             editable: true,
             draggable: options.draggable || false,
             zIndex: 1
-        }
+        },
+        polylineOptions: Object.assign(
+            {
+                strokeColor: options.strokeColor || '#F75C54',
+                strokeOpacity: 0.9,
+                strokeWeight: 2,
+            },
+            polylineArrowOptions
+        ),
+
     });
     drawingManager.setMap(this.map);
 
     $('#draw-reset').remove();
-    $('[name="coordinates"]').remove();
+    if ($('[name="coordinates"]').length) $('[name="coordinates"]').remove();
+    if ($('[name="lat"]').length) $('[name="lat"]').remove();
+    if ($('[name="lng"]').length) $('[name="lng"]').remove();
 
     $(self.options.div).prepend('<input type="hidden" name="coordinates" class="absolute top-5 right-5 z-index-1">');
+    $(self.options.div).prepend('<input type="hidden" name="lat" class="absolute top-5 right-5 z-index-1">');
+    $(self.options.div).prepend('<input type="hidden" name="lng" class="absolute top-5 right-5 z-index-1">');
 
     $reset = $('<div class="btn-gmaps margin-top-10" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
     $(this.options.div).prepend($reset);
@@ -614,14 +640,16 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
 
         $reset.show();
 
-        // markercomplete, polygoncomplete
-        if (typeof(overlay.getPath) === 'function') { // polygon
+        // *complete
+        if (typeof(overlay.getPaths) === 'function') { // polygon
             self.setDrawingManagerInput(overlay.getPath().getArray());
             self.addPolygonEvents(overlay);
 
             var m2 = self.getSize(overlay);
             self.setSizeInput(m2);
-
+        } else if (typeof(overlay.getPath) === 'function') { // polyline
+            self.setDrawingManagerInput(overlay.getPath().getArray());
+            // self.addPolylineEvents(overlay);
         } else if (typeof(overlay.getPosition) === 'function') { // marker
             self.setDrawingManagerInput(overlay.getPosition(), overlay.getPosition().lat(), overlay.getPosition().lng());
             self.addMarkerEvents(overlay);
@@ -646,18 +674,12 @@ GoogleMaps.prototype.setDrawingManagerInput = function (coordinates, lat, lng) {
     var lat = lat || null;
     var lng = lng || null;
 
-    $(this.options.div).find('input[name=coordinates]').val(coordinates);
-    if ($('[name=lat]').length) {
-        $('[name=lat]').val(lat);
-    }
-    if ($('[name=lng]').length) {
-        $('[name=lng]').val(lng);
-    }
+    if ($('[name="coordinates"]').length) $(this.options.div).find('[name="coordinates"]').val(coordinates);
+    if ($('[name="lat"]').length) $('[name="lat"]').val(lat);
+    if ($('[name="lng"]').length) $('[name="lng"]').val(lng);
 
     // TODO Remove this, name convention
-    if ($('[name=long]').length) {
-        $('[name=long]').val(lng);
-    }
+    if ($('[name="long"]').length) $('[name="long"]').val(lng);
 
     $.session.set('coordinates', coordinates);
 };
