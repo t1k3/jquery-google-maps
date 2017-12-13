@@ -15,6 +15,7 @@ function GoogleMaps(options) {
     this.options.printable = typeof(options.printable) != 'undefined' ? options.printable : false;
     this.options.locationable = typeof(options.locationable) != 'undefined' ? options.locationable : false;
     this.options.streetviewable = typeof(options.streetviewable) != 'undefined' ? options.streetviewable : false;
+    this.options.fitzoomable = typeof(options.fitzoomable) != 'undefined' ? options.fitzoomable : false;
 
     this.bounds = new google.maps.LatLngBounds();
     this.objects = {
@@ -73,6 +74,16 @@ function GoogleMaps(options) {
         });
 
         self.setPanorama();
+    }
+
+    if (this.options.fitzoomable) {
+        var $fitZoomBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" id="map-street-view"><i class="fa fa-window-restore"></i></div>');
+        $(this.options.div).prepend($fitZoomBtn);
+        this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($fitZoomBtn[0]);
+
+        google.maps.event.addDomListener($fitZoomBtn[0], 'click', function (event) {
+            self.fitZoom();
+        });
     }
 
 
@@ -520,7 +531,7 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon) {
     /*google.maps.event.addListener(polygon.getPath(), 'set_at', function(event) {
      self.setDrawingManagerInput(polygon.getPath().getArray());
      });*/
-}
+};
 
 // Add infoWindow
 GoogleMaps.prototype.addInfoWindow = function (object, options) {
