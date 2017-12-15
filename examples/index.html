@@ -21,9 +21,10 @@
     <div id="map-canvas" class="gmaps"></div>
     <div id="map-canvas-polygon" class="gmaps"></div>
     <div id="map-canvas-draw" class="gmaps"></div>
+    <div id="map-canvas-location" class="gmaps"></div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7_13ktzrKknj5Oy8zs66OOxJOgXrf79g&libraries=geometry,drawing"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=&libraries=geometry,drawing"></script>
 
 <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 <script src="../node_modules/jquery.session/jquery.session.js"></script>
@@ -168,11 +169,25 @@
             streetViewControl: true,
         });
         initDrawingManager(gmapsDraw);
-//        gmapsDraw.setLocation({
-//            to: 'customDraws.marker'
-//        });
 
-        // gmapsDraw.fitZoom();
+        // location
+        var gmapsLocation = new GoogleMaps({
+            div: "#map-canvas-location",
+//            latlng: {lat: 47.157562, lng: 18.3847344},
+            zoom: 8,
+            type: "roadmap",
+
+            locationable: true,
+            streetviewable: true,
+            printable: true,
+
+            gestureHandling: "greedy", // "none", "greedy", "cooperative"
+            fullscreenControl: true,
+            streetViewControl: true,
+        });
+        gmapsLocation.setLocation({
+            to: 'customDraws.marker',
+        });
     });
 </script>
 </body>
