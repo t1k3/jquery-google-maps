@@ -4,18 +4,18 @@ function GoogleMaps(options) {
     // variables
     this.options = options;
 
-    this.options.latlng = typeof(options.latlng) != 'undefined' ? options.latlng : {lat: 47.1556941, lng: 18.3847734};
+    this.options.latlng = typeof options.latlng !== 'undefined' ? options.latlng : {lat: 47.1556941, lng: 18.3847734};
 
-    this.options.hideCustomMarkers = typeof(options.hideCustomMarkers) != 'undefined' ? options.hideCustomMarkers : false;
+    this.options.hideCustomMarkers = typeof options.hideCustomMarkers !== 'undefined' ? options.hideCustomMarkers : false;
 
-    this.options.fullscreenControl = typeof(options.fullscreenControl) != 'undefined' ? options.fullscreenControl : false;
-    this.options.streetViewControl = typeof(options.streetViewControl) != 'undefined' ? options.streetViewControl : false;
-    this.options.gestureHandling = typeof(options.gestureHandling) != 'undefined' ? options.gestureHandling : 'cooperative';
+    this.options.fullscreenControl = typeof options.fullscreenControl !== 'undefined' ? options.fullscreenControl : false;
+    this.options.streetViewControl = typeof options.streetViewControl !== 'undefined' ? options.streetViewControl : false;
+    this.options.gestureHandling = typeof options.gestureHandling !== 'undefined' ? options.gestureHandling : 'cooperative';
 
-    this.options.printable = typeof(options.printable) != 'undefined' ? options.printable : false;
-    this.options.locationable = typeof(options.locationable) != 'undefined' ? options.locationable : false;
-    this.options.streetviewable = typeof(options.streetviewable) != 'undefined' ? options.streetviewable : false;
-    this.options.fitzoomable = typeof(options.fitzoomable) != 'undefined' ? options.fitzoomable : false;
+    this.options.printable = typeof options.printable !== 'undefined' ? options.printable : false;
+    this.options.locationable = typeof options.locationable !== 'undefined' ? options.locationable : false;
+    this.options.streetviewable = typeof options.streetviewable !== 'undefined' ? options.streetviewable : false;
+    this.options.fitzoomable = typeof options.fitzoomable !== 'undefined' ? options.fitzoomable : false;
 
     this.bounds = new google.maps.LatLngBounds();
     this.objects = {
@@ -153,11 +153,11 @@ GoogleMaps.prototype.showLocation = function () {
                 console.log('error', response);
 
                 /*swal({
-                    title: Lang.get('text.not_locationable.title'),
-                    text: Lang.get('text.not_locationable.description'),
-                    type: 'error',
-                    html: true
-                });*/
+                 title: Lang.get('text.not_locationable.title'),
+                 text: Lang.get('text.not_locationable.description'),
+                 type: 'error',
+                 html: true
+                 });*/
             }
         );
     } else {
@@ -294,7 +294,7 @@ GoogleMaps.prototype.geocode = function (address, callback) {
     var geocoder = new google.maps.Geocoder();
     geocoder.geocode({'address': address}, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
-            if (typeof(callback) === 'function') {
+            if (typeof callback === 'function') {
                 callback(results[0].geometry.location);
             }
             return results[0].geometry.location;
@@ -320,7 +320,7 @@ GoogleMaps.prototype.setZoom = function (zoom) {
 // Convert coordinates to paths
 GoogleMaps.prototype.coordinates2paths = function (coordinates) {
     var paths = coordinates;
-    if (typeof(coordinates[0].lat) === 'undefined') {
+    if (typeof coordinates[0].lat === 'undefined') {
         if (!Array.isArray(coordinates[0])) {
             return {
                 lat: Number(coordinates[0]),
@@ -354,7 +354,7 @@ GoogleMaps.prototype.walkObject = function (obj, str) {
      return obj;*/
 
     return str.split(".").reduce(function (o, x) {
-        if (typeof(o[x]) === 'undefined') o[x] = [];
+        if (typeof o[x] === 'undefined') o[x] = [];
         return o[x];
     }, obj);
 }
@@ -383,7 +383,7 @@ GoogleMaps.prototype.addHeatmap = function (coordinates) {
 GoogleMaps.prototype.addMarker = function (latlng, options) {
     var self = this;
 
-    if (typeof(latlng.lat) === 'undefined') {
+    if (typeof latlng.lat === 'undefined') {
         var latlng = self.coordinates2paths(latlng);
     }
 
@@ -397,11 +397,11 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
         latlng = polygon.getApproximateCenter();
     }
 
-    if (typeof(latlng.lat) !== 'undefined' && typeof(latlng.lng) !== 'undefined') {
+    if (typeof latlng.lat !== 'undefined' && typeof latlng.lng !== 'undefined') {
         var options = options || {};
         options.to = options.to || 'markers.places';
 
-        if (typeof(options.icon) !== 'undefined' && options.icon !== null) {
+        if (typeof options.icon !== 'undefined' && options.icon !== null) {
             var icon = {
                 url: options.icon,
                 // scaledSize: new google.maps.Size(21, 34),
@@ -415,7 +415,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
             position: latlng,
             map: this.map,
             draggable: options.draggable || false,
-            icon: typeof(icon) !== 'undefined' ? icon : '' // 'https://maps.google.com/mapfiles/ms/micons/green.png'
+            icon: typeof icon !== 'undefined' ? icon : '' // 'https://maps.google.com/mapfiles/ms/micons/green.png'
         });
 
         // this.objects.markers.push(marker);
@@ -439,10 +439,14 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
 GoogleMaps.prototype.addMarkerEvents = function (marker, callback) {
     let self = this;
 
-    google.maps.event.addListener(marker, 'dragend', function (event) {
-        self.setDrawingManagerInput(marker);
+    if (typeof callback !== 'function') {
+        callback = function (marker) {
+            self.setDrawingManagerInput(marker);
+        }
+    }
 
-        if (typeof(callback) == 'function') callback(marker);
+    google.maps.event.addListener(marker, 'dragend', function () {
+        callback(marker);
     });
 }
 
@@ -451,7 +455,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     var self = this;
     var options = options || {};
     options.to = options.to || 'polygons';
-    options.bounds = typeof(options.bounds) !== 'undefined' ? options.bounds : true;
+    options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
 
     var paths = this.coordinates2paths(coordinates);
     var polygon = new google.maps.Polygon({
@@ -476,7 +480,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
         });
     }
 
-    if (typeof(options.label) !== 'undefined') {
+    if (typeof options.label !== 'undefined') {
         var customMarker = new CustomMarker(
             polygon.getApproximateCenter(), // polygon.getBounds().getCenter(),
             this.map,
@@ -487,7 +491,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
         this.objects.customMarkers.push(customMarker);
     }
 
-    if (typeof(options.infoWindow) !== 'undefined') {
+    if (typeof options.infoWindow !== 'undefined') {
         this.addInfoWindow(polygon, {
             content: options.infoWindow
         });
@@ -499,7 +503,15 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
 
 // Polygon events
 GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
+    let self = this;
     let fillOpacity = polygon.fillOpacity;
+
+    if (typeof callback !== 'function') {
+        callback = function (polygon) {
+            self.setDrawingManagerInput(polygon);
+            console.log(polygon.getPath().getArray());
+        }
+    }
 
     google.maps.event.addListener(polygon, 'mouseover', function () {
         this.setOptions({fillOpacity: .2});
@@ -508,6 +520,9 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
         this.setOptions({fillOpacity: fillOpacity});
     });
 
+    google.maps.event.addListener(polygon, 'dragend', function () {
+        callback(polygon);
+    });
     polygon.getPaths().forEach(function (path, index) {
         google.maps.event.addListener(path, 'insert_at', function () {
             callback(polygon);
@@ -527,7 +542,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     var self = this;
     var options = options || {};
     options.to = options.to || 'polygons';
-    options.bounds = typeof(options.bounds) !== 'undefined' ? options.bounds : true;
+    options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
 
     var paths = this.coordinates2paths(coordinates);
     var polyline = new google.maps.Polyline({
@@ -541,8 +556,8 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
 
     polyline.setMap(this.map);
 
-    // this.objects.polylines.push(polygon);
-    this.push2object(options.to, polygon);
+    // this.objects.polylines.push(polyline);
+    this.push2object(options.to, polyline);
 
     if (options.bounds) {
         $.each(paths, function (index, val) {
@@ -550,7 +565,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
         });
     }
 
-    if (typeof(options.label) !== 'undefined') {
+    if (typeof options.label !== 'undefined') {
         var customMarker = new CustomMarker(
             polyline.getApproximateCenter(), // polygon.getBounds().getCenter(),
             this.map,
@@ -561,17 +576,27 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
         this.objects.customMarkers.push(customMarker);
     }
 
-    if (typeof(options.infoWindow) !== 'undefined') {
+    if (typeof options.infoWindow !== 'undefined') {
         this.addInfoWindow(polyline, {
             content: options.infoWindow
         });
     }
 
-    self.addPolygonEvents(polygon);
-    return polygon;
+    self.addPolylineEvents(polyline);
+    return polyline;
 };
 
 GoogleMaps.prototype.addPolylineEvents = function (polyline) {
+    let self = this;
+    if (typeof callback !== 'function') {
+        callback = function (polyline) {
+            self.setDrawingManagerInput(polyline);
+        }
+    }
+
+    google.maps.event.addListener(polyline, 'dragend', function () {
+        callback(polyline);
+    });
     polyline.getPath().forEach(function (path, index) {
         google.maps.event.addListener(path, 'insert_at', function () {
             callback(polyline);
@@ -590,7 +615,7 @@ GoogleMaps.prototype.addPolylineEvents = function (polyline) {
 // Add infoWindow
 GoogleMaps.prototype.addInfoWindow = function (object, options) {
     var options = options || {};
-    if (typeof(options.content) !== 'undefined') {
+    if (typeof options.content !== 'undefined') {
         object.info = new google.maps.InfoWindow({
             content: options.content
         });
@@ -700,7 +725,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
 
     $reset.hide();
 
-    if (typeof(options.drawingControl) !== 'undefined' && !options.drawingControl) {
+    if (typeof options.drawingControl !== 'undefined' && !options.drawingControl) {
         self.drawingManager.setDrawingMode(null);
         self.drawingManager.setMap(null);
 
@@ -730,6 +755,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
         let object = self.objects.customDraws[type];
         $.each(object, function (index, value) {
             if (value && value.id == id) {
+                self.resetDrawingManagerInput(id);
                 object[index].setMap(null);
                 delete object[index];
             }
@@ -760,33 +786,40 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
                 overlay.id = drawingManager.markerOptions.id || self.guid();
                 overlay.callback = drawingManager.markerOptions.callback;
 
-                if (typeof(overlay.callback) !== 'function') {
+                if (typeof overlay.callback !== 'function') {
                     overlay.callback = function (overlay) {
                         self.setDrawingManagerInput(overlay);
                     }
                 }
+
+                self.addMarkerEvents(overlay, overlay.callback);
                 break;
             case 'polygon':
                 overlay.id = drawingManager.polygonOptions.id || self.guid();
                 overlay.callback = drawingManager.polygonOptions.callback;
 
-                if (typeof(overlay.callback) !== 'function') {
+                if (typeof overlay.callback !== 'function') {
                     overlay.callback = function (overlay) {
                         self.setDrawingManagerInput(overlay);
+
                         let m2 = self.getSize(overlay)
                         self.setSizeInput(m2);
                     }
                 }
+
+                self.addPolygonEvents(overlay, overlay.callback);
                 break;
             case 'polyline':
                 overlay.id = drawingManager.polylineOptions.id || self.guid();
                 overlay.callback = drawingManager.polylineOptions.callback;
 
-                if (typeof(overlay.callback) !== 'function') {
+                if (typeof overlay.callback !== 'function') {
                     overlay.callback = function (overlay) {
                         self.setDrawingManagerInput(overlay);
                     }
                 }
+
+                self.addPolylineEvents(overlay, overlay.callback);
                 break;
         }
         self.push2object('customDraws.' + overlay.type, overlay);
@@ -799,7 +832,6 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
             $reset.show();
 
         });
-        self.addMarkerEvents(overlay, overlay.callback);
         overlay.callback(overlay);
 
         let count = Object.keys(self.objects.customDraws[event.type]).length;
@@ -830,7 +862,7 @@ GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
         $input = $('<input type="hidden">');
         $input.attr({
             'name': 'coordinates[' + overlay.type + '][]',
-            'class': 'gmaps-drawing-manager-input hidden',
+            'class': 'input-gmaps hidden',
             'data-id': overlay.id
         });
         $(self.options.div).prepend($input);
@@ -909,8 +941,8 @@ GoogleMaps.prototype.resetDrawingManager = function () {
 
 // Reset drawing manager inputs | reset
 GoogleMaps.prototype.resetDrawingManagerInput = function (overlayId) {
-    if (typeof overlayId === 'undefined') $(this.options.div + ' .gmaps-drawing-manager-input').remove();
-    else $(this.options.div + ' .gmaps-drawing-manager-input[data-id=' + overlayId + ']').remove();
+    if (typeof overlayId === 'undefined') $(this.options.div + ' .input-gmaps').remove();
+    else $(this.options.div + ' .input-gmaps[data-id=' + overlayId + ']').remove();
 };
 
 // Show custom markers (polygon title)
