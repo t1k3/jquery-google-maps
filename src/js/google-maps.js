@@ -249,7 +249,8 @@ GoogleMaps.prototype.setLocation = function (options) {
 
     let self = this;
     options.to = options.to || 'customDraws.markers';
-    options.icon = options.icon || 'https://maps.google.com/mapfiles/ms/micons/blue.png';
+    options.icon = typeof options.icon !== 'undefined' ? options.icon : 'https://maps.google.com/mapfiles/ms/micons/blue.png';
+    options.draggable = options.draggable || false;
 
     if (navigator.geolocation) {
         self.resetDrawingManager();
@@ -259,18 +260,32 @@ GoogleMaps.prototype.setLocation = function (options) {
                 let latlng = {lat: position.coords.latitude, lng: position.coords.longitude};
                 let marker = self.addMarker(latlng, {
                     to: options.to,
-                    draggable: true,
+                    draggable: options.draggable,
                     icon: options.icon,
 
                     id: self.guid(),
-                    type: 'marker'
+                    type: 'marker',
                 });
 
                 self.addDrawingManager({
                     drawingModes: ['marker'],
                     drawingControl: false,
                 });
-                self.setDrawingManagerInput(marker);
+
+                if (typeof options.callback !== 'function') {
+                    options.callback = function (marker) {
+                        self.setDrawingManagerInput(marker);
+
+                        /*google.maps.event.addListener(marker, 'click', function () {
+                            $reset = $('#draw-reset');
+
+                            $reset.attr('data-id', marker.id);
+                            $reset.attr('data-object', marker.type);
+                            $reset.show();
+                        });*/
+                    }
+                }
+                options.callback(marker);
 
                 console.log('success', latlng);
             },
@@ -381,16 +396,16 @@ GoogleMaps.prototype.addHeatmap = function (coordinates) {
 
 // Add marker
 GoogleMaps.prototype.addMarker = function (latlng, options) {
-    var self = this;
+    let self = this;
+    let marker = null;
+    let markerIcon = '';
 
     if (typeof latlng.lat === 'undefined') {
-        var latlng = self.coordinates2paths(latlng);
+        latlng = self.coordinates2paths(latlng);
     }
-
-    // if it not latlng, then get paths center
     if (latlng.length > 1) {
-        var paths = self.coordinates2paths(latlng);
-        var polygon = new google.maps.Polygon({
+        let paths = self.coordinates2paths(latlng);
+        let polygon = new google.maps.Polygon({
             paths: paths
         });
 
@@ -398,11 +413,11 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
     }
 
     if (typeof latlng.lat !== 'undefined' && typeof latlng.lng !== 'undefined') {
-        var options = options || {};
+        options = options || {};
         options.to = options.to || 'markers.places';
 
         if (typeof options.icon !== 'undefined' && options.icon !== null) {
-            var icon = {
+            markerIcon = {
                 url: options.icon,
                 // scaledSize: new google.maps.Size(21, 34),
                 // scaledSize: new google.maps.Size(32, 37),
@@ -411,12 +426,14 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
             };
         }
 
-        var marker = new google.maps.Marker({
+        marker = new google.maps.Marker({
             position: latlng,
             map: this.map,
             draggable: options.draggable || false,
-            icon: typeof icon !== 'undefined' ? icon : '' // 'https://maps.google.com/mapfiles/ms/micons/green.png'
+            icon: markerIcon, // 'https://maps.google.com/mapfiles/ms/micons/green.png',
         });
+        marker.id = options.id || self.guid();
+        marker.type = options.type || 'marker';
 
         // this.objects.markers.push(marker);
         // this.objects.markers[options.to].push(marker);
@@ -431,7 +448,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
         }
     }
 
-    self.addMarkerEvents(marker);
+    self.addMarkerEvents(marker, options.callback);
     return marker;
 };
 
@@ -497,7 +514,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
         });
     }
 
-    self.addPolygonEvents(polygon);
+    self.addPolygonEvents(polygon, options.callback);
     return polygon;
 };
 
@@ -582,11 +599,11 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
         });
     }
 
-    self.addPolylineEvents(polyline);
+    self.addPolylineEvents(polyline, options.callback);
     return polyline;
 };
 
-GoogleMaps.prototype.addPolylineEvents = function (polyline) {
+GoogleMaps.prototype.addPolylineEvents = function (polyline, callback) {
     let self = this;
     if (typeof callback !== 'function') {
         callback = function (polyline) {
@@ -867,7 +884,7 @@ GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
         });
         $(self.options.div).prepend($input);
     }
-    $input.attr('val', coordinates);
+    $input.attr('value', coordinates);
     let session = self.stringToObject('coordinates.' + overlay.type + '.' + overlay.id, coordinates);
     $.session.set(window.location.href, JSON.stringify(session));
     // if ($.session.get(window.location.href)) console.log(JSON.parse($.session.get(window.location.href)));
