@@ -440,7 +440,7 @@ GoogleMaps.prototype.addMarkerEvents = function (marker, callback) {
     let self = this;
 
     google.maps.event.addListener(marker, 'dragend', function (event) {
-        self.setDrawingManagerInput(marker.getPosition(), marker.getPosition().lat(), marker.getPosition().lng());
+        self.setDrawingManagerInput(marker);
 
         if (typeof(callback) == 'function') callback(marker);
     });
