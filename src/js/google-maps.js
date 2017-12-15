@@ -45,7 +45,7 @@ function GoogleMaps(options) {
 
     // btns
     if (this.options.printable) {
-        var $printBtn = $('<div class="btn-gmaps margin-right-10" id="map-print"><i class="fa fa-print"></i></div>');
+        var $printBtn = $('<div class="btn-gmaps margin-right-10" role="button" id="map-print"><i class="fa fa-print"></i></div>');
         $(this.options.div).prepend($printBtn);
         this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($printBtn[0]);
 
@@ -55,7 +55,7 @@ function GoogleMaps(options) {
     }
 
     if (this.options.locationable) {
-        var $showLocationBtn = $('<div class="btn-gmaps margin-right-10 margin-bottom-10" id="map-location"><i class="fa fa-location-arrow"></i></div>');
+        var $showLocationBtn = $('<div class="btn-gmaps margin-right-10 margin-bottom-10" role="button" id="map-location"><i class="fa fa-location-arrow"></i></div>');
         $(this.options.div).prepend($showLocationBtn);
         this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($showLocationBtn[0]);
 
@@ -65,7 +65,7 @@ function GoogleMaps(options) {
     }
 
     if (this.options.streetviewable) {
-        var $streetViewBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" id="map-street-view"><i class="fa fa-street-view"></i></div>');
+        var $streetViewBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" role="button" id="map-street-view"><i class="fa fa-street-view"></i></div>');
         $(this.options.div).prepend($streetViewBtn);
         this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($streetViewBtn[0]);
 
@@ -77,7 +77,7 @@ function GoogleMaps(options) {
     }
 
     if (this.options.fitzoomable) {
-        var $fitZoomBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" id="map-street-view"><i class="fa fa-window-restore"></i></div>');
+        var $fitZoomBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" role="button" id="map-street-view"><i class="fa fa-window-restore"></i></div>');
         $(this.options.div).prepend($fitZoomBtn);
         this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($fitZoomBtn[0]);
 
@@ -142,7 +142,7 @@ GoogleMaps.prototype.showLocation = function () {
                     to: 'markers.location',
                     // infoWindow: Lang.get('text.my_location') + '<small class="center-block">(' + latlng.lat + ',' + latlng.lng + ')</small>',
                     infoWindow: '<b>(' + latlng.lat + ',' + latlng.lng + ')</b>',
-                    // icon: 'https://maps.google.com/mapfiles/ms/micons/orange.png',
+                    icon: 'https://maps.google.com/mapfiles/ms/micons/blue.png',
                 });
 
                 self.fitZoom();
@@ -244,32 +244,33 @@ GoogleMaps.prototype.resetSizeInput = function () {
 };
 
 // Set your location, fill inputs: lat, lng
-GoogleMaps.prototype.setLocation = function () {
+GoogleMaps.prototype.setLocation = function (options) {
     console.log('setLocation');
 
-    var self = this;
+    let self = this;
+    options.to = options.to || 'customDraws.markers';
+    options.icon = options.icon || 'https://maps.google.com/mapfiles/ms/micons/blue.png';
 
     if (navigator.geolocation) {
         self.resetDrawingManager();
 
         navigator.geolocation.getCurrentPosition(
             function (position) {
-                var latlng = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
+                let latlng = {lat: position.coords.latitude, lng: position.coords.longitude};
+                let marker = self.addMarker(latlng, {
+                    to: options.to,
+                    draggable: true,
+                    icon: options.icon,
 
-                self.addMarker(latlng, {
-                    to: 'customDraws',
-                    draggable: true
+                    id: self.guid(),
+                    type: 'marker'
                 });
+
                 self.addDrawingManager({
                     drawingModes: ['marker'],
                     drawingControl: false,
                 });
-
-                if ($('[name="lat"]').length) $('[name="lat"]').val(latlng.lat);
-                if ($('[name="lng"]').length) $('[name="lng"]').val(latlng.lng);
+                self.setDrawingManagerInput(marker);
 
                 console.log('success', latlng);
             },
@@ -435,10 +436,13 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
 };
 
 // Marker events
-GoogleMaps.prototype.addMarkerEvents = function (marker) {
-    var self = this;
+GoogleMaps.prototype.addMarkerEvents = function (marker, callback) {
+    let self = this;
+
     google.maps.event.addListener(marker, 'dragend', function (event) {
         self.setDrawingManagerInput(marker.getPosition(), marker.getPosition().lat(), marker.getPosition().lng());
+
+        if (typeof(callback) == 'function') callback(marker);
     });
 }
 
@@ -494,43 +498,93 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
 };
 
 // Polygon events
-GoogleMaps.prototype.addPolygonEvents = function (polygon) {
-    var self = this;
-    var fillOpacity = polygon.fillOpacity;
+GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
+    let fillOpacity = polygon.fillOpacity;
 
-    google.maps.event.addListener(polygon, 'mouseover', function (event) {
+    google.maps.event.addListener(polygon, 'mouseover', function () {
         this.setOptions({fillOpacity: .2});
     });
-    google.maps.event.addListener(polygon, 'mouseout', function (event) {
+    google.maps.event.addListener(polygon, 'mouseout', function () {
         this.setOptions({fillOpacity: fillOpacity});
     });
 
     polygon.getPaths().forEach(function (path, index) {
         google.maps.event.addListener(path, 'insert_at', function () {
-            self.setDrawingManagerInput(polygon.getPath().getArray());
-
-            var m2 = self.getSize(polygon);
-            self.setSizeInput(m2);
+            callback(polygon);
         });
 
         google.maps.event.addListener(path, 'remove_at', function () {
-            self.setDrawingManagerInput(polygon.getPath().getArray());
-
-            var m2 = self.getSize(polygon);
-            self.setSizeInput(m2);
+            callback(polygon);
         });
 
         google.maps.event.addListener(path, 'set_at', function () {
-            self.setDrawingManagerInput(polygon.getPath().getArray());
-
-            var m2 = self.getSize(polygon);
-            self.setSizeInput(m2);
+            callback(polygon);
         });
     });
+};
 
-    /*google.maps.event.addListener(polygon.getPath(), 'set_at', function(event) {
-     self.setDrawingManagerInput(polygon.getPath().getArray());
-     });*/
+GoogleMaps.prototype.addPolyline = function (coordinates, options) {
+    var self = this;
+    var options = options || {};
+    options.to = options.to || 'polygons';
+    options.bounds = typeof(options.bounds) !== 'undefined' ? options.bounds : true;
+
+    var paths = this.coordinates2paths(coordinates);
+    var polyline = new google.maps.Polyline({
+        paths: paths,
+        strokeColor: options.strokeColor || '#1ab394',
+        strokeOpacity: options.strokeOpacity || 0.8,
+        strokeWeight: options.strokeWeight || 2,
+        draggable: options.draggable || false,
+        editable: options.editable || false
+    });
+
+    polyline.setMap(this.map);
+
+    // this.objects.polylines.push(polygon);
+    this.push2object(options.to, polygon);
+
+    if (options.bounds) {
+        $.each(paths, function (index, val) {
+            self.bounds.extend(val);
+        });
+    }
+
+    if (typeof(options.label) !== 'undefined') {
+        var customMarker = new CustomMarker(
+            polyline.getApproximateCenter(), // polygon.getBounds().getCenter(),
+            this.map,
+            {
+                content: options.label
+            }
+        );
+        this.objects.customMarkers.push(customMarker);
+    }
+
+    if (typeof(options.infoWindow) !== 'undefined') {
+        this.addInfoWindow(polyline, {
+            content: options.infoWindow
+        });
+    }
+
+    self.addPolygonEvents(polygon);
+    return polygon;
+};
+
+GoogleMaps.prototype.addPolylineEvents = function (polyline) {
+    polyline.getPath().forEach(function (path, index) {
+        google.maps.event.addListener(path, 'insert_at', function () {
+            callback(polyline);
+        });
+
+        google.maps.event.addListener(path, 'remove_at', function () {
+            callback(polyline);
+        });
+
+        google.maps.event.addListener(path, 'set_at', function () {
+            callback(polyline);
+        });
+    });
 };
 
 // Add infoWindow
@@ -561,11 +615,24 @@ GoogleMaps.prototype.addMarkerCluster = function (icon) {
 
 };
 
+// Generate UUID
+GoogleMaps.prototype.guid = function () {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+};
+
 // Add drawing manager
 GoogleMaps.prototype.addDrawingManager = function (options) {
     var self = this;
     var options = options || {};
     options.drawingModes = options.drawingModes || ['marker', 'polygon'];
+
+    options.markerOptions = options.markerOptions || {};
+    options.polygonOptions = options.polygonOptions || {};
+    options.polylineOptions = options.polylineOptions || {};
 
     var polylineArrowOptions = {};
     if ((index = options.drawingModes.indexOf('polyline-arrow')) >= 0) {
@@ -580,9 +647,10 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         };
     }
 
-    drawingManager = self.drawingManager = new google.maps.drawing.DrawingManager({
+    self.drawingManager = new google.maps.drawing.DrawingManager({
         // drawingMode: google.maps.drawing.OverlayType.MARKER,
         drawingMode: options.drawingModes[0],
+        drawingModeOptions: options.drawingModeOptions,
         drawingControl: true,
         drawingControlOptions: {
             position: google.maps.ControlPosition.TOP_CENTER,
@@ -590,7 +658,10 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         },
         markerOptions: {
             draggable: true,
-            icon: options.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png'
+            icon: options.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png',
+
+            max: options.markerOptions.max || 1,
+            callback: options.markerOptions.callback || null
         },
         polygonOptions: {
             strokeColor: options.strokeColor || '#F75C54',
@@ -598,105 +669,187 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             strokeWeight: 2,
             fillColor: options.fillColor || '#F75C54',
             fillOpacity: 0.35,
-            // clickable: false,
             editable: true,
             draggable: options.draggable || false,
-            zIndex: 1
+            zIndex: 1,
+
+            max: options.polygonOptions.max || 1,
+            callback: options.polygonOptions.callback || null
         },
         polylineOptions: Object.assign(
             {
                 strokeColor: options.strokeColor || '#F75C54',
                 strokeOpacity: 0.9,
                 strokeWeight: 2,
+                editable: true,
+                draggable: options.draggable || false,
+
+                max: options.polylineOptions.max || 1,
+                callback: options.polylineOptions.callback || null
             },
             polylineArrowOptions
         ),
 
     });
-    drawingManager.setMap(this.map);
+    self.drawingManager.setMap(this.map);
 
     $('#draw-reset').remove();
-    if ($('[name="coordinates"]').length) $('[name="coordinates"]').remove();
-    if ($('[name="lat"]').length) $('[name="lat"]').remove();
-    if ($('[name="lng"]').length) $('[name="lng"]').remove();
-
-    $(self.options.div).prepend('<input type="hidden" name="coordinates" class="absolute top-5 right-5 z-index-1">');
-    $(self.options.div).prepend('<input type="hidden" name="lat" class="absolute top-5 right-5 z-index-1">');
-    $(self.options.div).prepend('<input type="hidden" name="lng" class="absolute top-5 right-5 z-index-1">');
-
-    $reset = $('<div class="btn-gmaps margin-top-10" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
+    $reset = $('<div class="btn-gmaps btn-gmaps-xs margin-top-5" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
     $(this.options.div).prepend($reset);
     this.map.controls[google.maps.ControlPosition.TOP_CENTER].push($reset[0]);
 
     $reset.hide();
 
     if (typeof(options.drawingControl) !== 'undefined' && !options.drawingControl) {
-        drawingManager.setDrawingMode(null);
-        drawingManager.setMap(null);
+        self.drawingManager.setDrawingMode(null);
+        self.drawingManager.setMap(null);
 
-        $reset.show();
+        // $reset.show();
     }
 
-    self.addDrawingManagerEvents(drawingManager, $reset);
+    self.addDrawingManagerEvents(self.drawingManager, $reset);
 
 };
 
 // Drawing manager events
 GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset) {
     var self = this;
-    google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
-        var overlay = event.overlay;
 
-        self.objects.customDraws.push(overlay);
+    // hide delete btn
+    google.maps.event.addListener(this.map, 'click', function () {
+        if ($reset.is(':visible')) $reset.hide();
+    });
+    google.maps.event.addDomListener($('[role=button]')[0], 'click', function () {
+        if ($reset.is(':visible')) $reset.hide();
+    });
 
-        drawingManager.setDrawingMode(null);
-        drawingManager.setMap(null);
+    // delete btn click
+    google.maps.event.addDomListener($reset[0], 'click', function () {
+        let id = $(this).attr('data-id');
+        let type = $(this).attr('data-object'); // marker, polygon, polyline
+        let object = self.objects.customDraws[type];
+        $.each(object, function (index, value) {
+            if (value && value.id == id) {
+                object[index].setMap(null);
+                delete object[index];
+            }
+        });
 
-        $reset.show();
+        $(this).removeAttr('data-id');
+        $(this).removeAttr('data-object');
+        $(this).hide();
 
-        // *complete
-        if (typeof(overlay.getPaths) === 'function') { // polygon
-            self.setDrawingManagerInput(overlay.getPath().getArray());
-            self.addPolygonEvents(overlay);
-
-            var m2 = self.getSize(overlay);
-            self.setSizeInput(m2);
-        } else if (typeof(overlay.getPath) === 'function') { // polyline
-            self.setDrawingManagerInput(overlay.getPath().getArray());
-            // self.addPolylineEvents(overlay);
-        } else if (typeof(overlay.getPosition) === 'function') { // marker
-            self.setDrawingManagerInput(overlay.getPosition(), overlay.getPosition().lat(), overlay.getPosition().lng());
-            self.addMarkerEvents(overlay);
+        let count = Object.keys(self.objects.customDraws[type]).length;
+        if (drawingManager[type + 'Options'].max > count) {
+            let indexOf = drawingManager.drawingControlOptions.drawingModes.indexOf(type);
+            if (indexOf === -1) {
+                drawingManager.drawingControlOptions.drawingModes.push(type);
+                drawingManager.setDrawingMode(type);
+                drawingManager.setMap(self.map);
+            }
         }
     });
 
-    google.maps.event.addDomListener($reset[0], 'click', function (event) {
-        $.each(self.objects.customDraws, function (index, val) {
-            val.setMap(null);
-        });
+    // overlaycomplete
+    google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
+        let overlay = event.overlay;
+        overlay.type = event.type;
 
-        $reset.hide();
-        self.resetSizeInput();
-        self.resetDrawingManagerInput();
-        drawingManager.setDrawingMode(drawingManager.drawingControlOptions.drawingModes[0]);
-        drawingManager.setMap(self.map);
+        switch (overlay.type) {
+            case 'marker':
+                overlay.id = drawingManager.markerOptions.id || self.guid();
+                overlay.callback = drawingManager.markerOptions.callback;
+
+                if (typeof(overlay.callback) !== 'function') {
+                    overlay.callback = function (overlay) {
+                        self.setDrawingManagerInput(overlay);
+                    }
+                }
+                break;
+            case 'polygon':
+                overlay.id = drawingManager.polygonOptions.id || self.guid();
+                overlay.callback = drawingManager.polygonOptions.callback;
+
+                if (typeof(overlay.callback) !== 'function') {
+                    overlay.callback = function (overlay) {
+                        self.setDrawingManagerInput(overlay);
+                        let m2 = self.getSize(overlay)
+                        self.setSizeInput(m2);
+                    }
+                }
+                break;
+            case 'polyline':
+                overlay.id = drawingManager.polylineOptions.id || self.guid();
+                overlay.callback = drawingManager.polylineOptions.callback;
+
+                if (typeof(overlay.callback) !== 'function') {
+                    overlay.callback = function (overlay) {
+                        self.setDrawingManagerInput(overlay);
+                    }
+                }
+                break;
+        }
+        self.push2object('customDraws.' + overlay.type, overlay);
+
+        google.maps.event.addListener(overlay, 'click', function () {
+            $reset = $('#draw-reset');
+
+            $reset.attr('data-id', overlay.id);
+            $reset.attr('data-object', overlay.type);
+            $reset.show();
+
+        });
+        self.addMarkerEvents(overlay, overlay.callback);
+        overlay.callback(overlay);
+
+        let count = Object.keys(self.objects.customDraws[event.type]).length;
+        if (drawingManager[overlay.type + 'Options'].max <= count) {
+            let indexOf = drawingManager.drawingControlOptions.drawingModes.indexOf(overlay.type);
+            drawingManager.drawingControlOptions.drawingModes.splice(indexOf, 1);
+            drawingManager.setDrawingMode(null);
+            drawingManager.setMap(self.map);
+        }
     });
 };
 
 // Set drawing manager inputs
-GoogleMaps.prototype.setDrawingManagerInput = function (coordinates, lat, lng) {
-    var lat = lat || null;
-    var lng = lng || null;
-
-    if ($('[name="coordinates"]').length) $(this.options.div).find('[name="coordinates"]').val(coordinates);
-    if ($('[name="lat"]').length) $('[name="lat"]').val(lat);
-    if ($('[name="lng"]').length) $('[name="lng"]').val(lng);
-
-    // TODO Remove this, name convention
-    if ($('[name="long"]').length) $('[name="long"]').val(lng);
-
-    $.session.set('coordinates', coordinates);
+GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
+    let self = this;
+    let coordinates = null;
+    switch (overlay.type) {
+        case 'marker':
+            coordinates = '(' + overlay.getPosition().lat() + ', ' + overlay.getPosition().lng() + ')';
+            break;
+        case 'polygon':
+        case 'polyline':
+            coordinates = overlay.getPath().getArray();
+            break;
+    }
+    let $input = $(self.options.div + ' input[data-id="' + overlay.id + '"]');
+    if (!$input.length) {
+        $input = $('<input type="hidden">');
+        $input.attr({
+            'name': 'coordinates[' + overlay.type + '][]',
+            'class': 'gmaps-drawing-manager-input hidden',
+            'data-id': overlay.id
+        });
+        $(self.options.div).prepend($input);
+    }
+    $input.attr('val', coordinates);
+    let session = self.stringToObject('coordinates.' + overlay.type + '.' + overlay.id, coordinates);
+    $.session.set(window.location.href, JSON.stringify(session));
+    // if ($.session.get(window.location.href)) console.log(JSON.parse($.session.get(window.location.href)));
 };
+
+GoogleMaps.prototype.stringToObject = function (key, value) {
+    var result = object = {};
+    var arr = key.split('.');
+    for (var i = 0; i < arr.length - 1; i++) {
+        object = object[arr[i]] = {};
+    }
+    object[arr[arr.length - 1]] = value;
+    return result;
+}
 
 // Reset map
 GoogleMaps.prototype.reset = function (objects) {
@@ -755,8 +908,9 @@ GoogleMaps.prototype.resetDrawingManager = function () {
 };
 
 // Reset drawing manager inputs | reset
-GoogleMaps.prototype.resetDrawingManagerInput = function () {
-    this.setDrawingManagerInput(null, null, null);
+GoogleMaps.prototype.resetDrawingManagerInput = function (overlayId) {
+    if (typeof overlayId === 'undefined') $(this.options.div + ' .gmaps-drawing-manager-input').remove();
+    else $(this.options.div + ' .gmaps-drawing-manager-input[data-id=' + overlayId + ']').remove();
 };
 
 // Show custom markers (polygon title)

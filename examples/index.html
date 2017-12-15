@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jQuery Google Maps</title>
+
+    <link rel="stylesheet" href="../node_modules/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../dist/css/google-maps.min.css">
+    <style>
+        .gmaps {
+            width: 480px;
+            height: 480px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!--Canvas of Google Maps-->
+    <div id="map-canvas" class="gmaps"></div>
+    <div id="map-canvas-polygon" class="gmaps"></div>
+    <div id="map-canvas-draw" class="gmaps"></div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=&libraries=geometry,drawing"></script>
+
+<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../node_modules/jquery.session/jquery.session.js"></script>
+<script src="../node_modules/js-marker-clusterer/src/markerclusterer_compiled.js"></script>
+<script src="../dist/js/google-maps.min.js"></script>
+
+<script>
+    var initMarkers = function (gmaps) {
+        var markerLatLng = {lat: 47.50706, lng: 19.047991};
+        gmaps.addMarker(markerLatLng, {
+            infoWindow: "<b>Palace of Parliament Hungary</b><br>Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            to: 'markers.customPlaces'
+        });
+        gmaps.setPanorama(markerLatLng);
+//        gmaps.setCenter(markerLatLng);
+//        gmaps.setZoom(16);
+
+//        For marker cluster
+        gmaps.addMarker({lat: 47.50706, lng: 19.046351}, {
+            infoWindow: 'For marker cluster',
+            to: 'markers.customPlaces'
+        });
+
+//        For marker (not) cluster(ed)
+        gmaps.addMarker({lat: 47.508, lng: 19.0464}, {
+            infoWindow: 'For marker (not) cluster',
+            to: 'markers.places'
+        });
+
+        gmaps.addMarkerCluster();
+        gmaps.fitZoom();
+    };
+
+    var initPolygon = function (gmaps) {
+        var coordinates = [
+            [48.42191, 22.126465],
+            [48.356249, 21.708984],
+            [48.57479, 21.533203],
+            [48.552978, 20.500488],
+            [48.268569, 20.291748],
+            [48.158757, 19.907227],
+            [48.253941, 19.643555],
+            [48.114767, 19.467773],
+            [48.041365, 18.753662],
+            [47.827908, 18.852539],
+            [47.754098, 17.687988],
+            [48.006412, 17.160945],
+            [47.706065, 17.078247],
+            [47.759637, 16.638794],
+            [47.680183, 16.446533],
+            [47.517201, 16.688232],
+            [47.032695, 16.369629],
+            [46.860191, 16.105957],
+            [46.860191, 16.33667],
+            [46.521076, 16.523438],
+            [46.475838, 16.596671],
+            [45.97406, 17.347412],
+            [45.769097, 17.862145],
+            [45.767523, 18.457031],
+            [45.921057, 18.890705],
+            [46.176027, 19.577637],
+            [46.126367, 20.264491],
+            [46.426499, 21.296997],
+            [47.743017, 22.313232],
+            [47.954065, 22.8961939],
+            [48.42191, 22.126465]
+        ];
+        gmaps.addPolygon(coordinates, {
+            label: '<div class="custom-marker">Label for Hungary Polygon</div>',
+            infoWindow: 'InfoWindow for Hungary Polygon'
+        });
+
+        gmaps.fitZoom();
+    }
+
+    var callback = function (marker) {
+        console.log(marker.id, marker.getPosition().lat(), marker.getPosition().lng());
+    };
+    var initDrawingManager = function (gmaps) {
+//        gmaps.resetDrawingManager();
+        gmaps.addDrawingManager({
+            drawingModes: ['marker', 'polygon', 'polyline-arrow'],
+            markerOptions: {
+                max: 3,
+                // callback: callback
+            },
+            drawingControl: true,
+        });
+    };
+
+    $(document).ready(function () {
+        console.log("App ready");
+
+        var gmaps = new GoogleMaps({
+            div: "#map-canvas",
+//            latlng: {lat: 47.157562, lng: 18.3847344},
+            zoom: 8,
+            type: "roadmap",
+
+            locationable: true,
+            streetviewable: true,
+            printable: true,
+            fitzoomable: true,
+
+            gestureHandling: "greedy", // "none", "greedy", "cooperative"
+            fullscreenControl: true,
+            streetViewControl: true,
+        });
+        initMarkers(gmaps);
+
+        var gmapsPolygon = new GoogleMaps({
+            div: "#map-canvas-polygon",
+//            latlng: {lat: 47.157562, lng: 18.3847344},
+            zoom: 8,
+            type: "roadmap",
+
+            locationable: true,
+            streetviewable: true,
+            printable: true,
+
+            gestureHandling: "greedy", // "none", "greedy", "cooperative"
+            fullscreenControl: true,
+            streetViewControl: true,
+
+            hideCustomMarkers: false,
+        });
+        initPolygon(gmapsPolygon);
+
+        // draw
+        var gmapsDraw = new GoogleMaps({
+            div: "#map-canvas-draw",
+//            latlng: {lat: 47.157562, lng: 18.3847344},
+            zoom: 8,
+            type: "roadmap",
+
+            locationable: true,
+            streetviewable: true,
+            printable: true,
+
+            gestureHandling: "greedy", // "none", "greedy", "cooperative"
+            fullscreenControl: true,
+            streetViewControl: true,
+        });
+        initDrawingManager(gmapsDraw);
+        gmapsDraw.setLocation({
+            to: 'markers.position'
+        });
+
+        // gmapsDraw.fitZoom();
+    });
+</script>
+</body>
+</html>
