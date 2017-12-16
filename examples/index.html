@@ -24,7 +24,7 @@
     <div id="map-canvas-location" class="gmaps"></div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=<GOOGLE_API_KEY>&libraries=geometry,drawing"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=&libraries=geometry,drawing"></script>
 
 <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 <script src="../node_modules/jquery.session/jquery.session.js"></script>
@@ -186,9 +186,13 @@
             streetViewControl: true,
         });
         gmapsLocation.setLocation({
-            to: 'customDraws.marker',
-            icon: '',
-            draggable: false,
+            callback: function (latlng) {
+                console.log('callback', latlng);
+            },
+            markerOptions: {
+                to: 'customDraws.marker',
+                draggable: true,
+            }
         });
     });
 </script>

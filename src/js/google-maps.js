@@ -248,9 +248,7 @@ GoogleMaps.prototype.setLocation = function (options) {
     console.log('setLocation');
 
     let self = this;
-    options.to = options.to || 'customDraws.markers';
-    options.icon = typeof options.icon !== 'undefined' ? options.icon : 'https://maps.google.com/mapfiles/ms/micons/blue.png';
-    options.draggable = options.draggable || false;
+
 
     if (navigator.geolocation) {
         self.resetDrawingManager();
@@ -258,34 +256,43 @@ GoogleMaps.prototype.setLocation = function (options) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
                 let latlng = {lat: position.coords.latitude, lng: position.coords.longitude};
-                let marker = self.addMarker(latlng, {
-                    to: options.to,
-                    draggable: options.draggable,
-                    icon: options.icon,
 
-                    id: self.guid(),
-                    type: 'marker',
-                });
+                if (typeof options.markerOptions !== 'undefined') {
+                    options.markerOptions.to = options.markerOptions.to || 'customDraws.markers';
+                    options.markerOptions.icon = typeof options.markerOptions.icon !== 'undefined' ? options.icon : 'https://maps.google.com/mapfiles/ms/micons/blue.png';
+                    options.markerOptions.draggable = options.markerOptions.draggable || false;
 
-                self.addDrawingManager({
-                    drawingModes: ['marker'],
-                    drawingControl: false,
-                });
+                    let marker = self.addMarker(latlng, {
+                        to: options.markerOptions.to,
+                        draggable: options.markerOptions.draggable,
+                        icon: options.markerOptions.icon,
 
-                if (typeof options.callback !== 'function') {
-                    options.callback = function (marker) {
-                        self.setDrawingManagerInput(marker);
+                        id: self.guid(),
+                        type: 'marker',
+                    });
 
-                        /*google.maps.event.addListener(marker, 'click', function () {
-                            $reset = $('#draw-reset');
+                    self.addDrawingManager({
+                        drawingModes: ['marker'],
+                        drawingControl: false,
+                    });
 
-                            $reset.attr('data-id', marker.id);
-                            $reset.attr('data-object', marker.type);
-                            $reset.show();
-                        });*/
+                    if (typeof options.markerOptions.callback !== 'function') {
+                        options.markerOptions.callback = function (marker) {
+                            self.setDrawingManagerInput(marker);
+
+                            /*google.maps.event.addListener(marker, 'click', function () {
+                             $reset = $('#draw-reset');
+
+                             $reset.attr('data-id', marker.id);
+                             $reset.attr('data-object', marker.type);
+                             $reset.show();
+                             });*/
+                        }
                     }
+                    options.markerOptions.callback(marker);
                 }
-                options.callback(marker);
+
+                if (typeof options.callback !== 'undefined') options.callback(latlng);
 
                 console.log('success', latlng);
             },
