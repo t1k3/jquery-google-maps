@@ -1,7 +1,22 @@
 function GoogleMaps(options) {
-    var self = this;
+    this.initOptions(options);
+    this.initVariables();
 
-    // variables
+    // initialize
+    // document.getElementById('map'), $('#map');
+    this.map = new google.maps.Map($(this.options.div)[0], {
+        center: this.options.latlng,
+        zoom: this.options.zoom || 8,
+        mapTypeId: this.options.type || 'hybrid',
+        fullscreenControl: this.options.fullscreenControl,
+        streetViewControl: this.options.streetViewControl,
+        gestureHandling: this.options.gestureHandling,
+    });
+
+    this.initBtns();
+};
+
+GoogleMaps.prototype.initOptions = function (options) {
     this.options = options;
 
     this.options.latlng = typeof options.latlng !== 'undefined' ? options.latlng : {lat: 47.1556941, lng: 18.3847734};
@@ -17,6 +32,10 @@ function GoogleMaps(options) {
     this.options.streetviewable = typeof options.streetviewable !== 'undefined' ? options.streetviewable : false;
     this.options.fitzoomable = typeof options.fitzoomable !== 'undefined' ? options.fitzoomable : false;
 
+    return this.options;
+};
+
+GoogleMaps.prototype.initVariables = function () {
     this.bounds = new google.maps.LatLngBounds();
     this.objects = {
         customMarkers: [],
@@ -31,64 +50,56 @@ function GoogleMaps(options) {
     this.markerCluster = {};
     this.drawingManager = null;
     this.panorama = null;
+};
 
-    // initialize
-    // document.getElementById('map'), $('#map');
-    this.map = new google.maps.Map($(this.options.div)[0], {
-        center: this.options.latlng,
-        zoom: this.options.zoom || 8,
-        mapTypeId: this.options.type || 'hybrid',
-        fullscreenControl: this.options.fullscreenControl,
-        streetViewControl: this.options.streetViewControl,
-        gestureHandling: this.options.gestureHandling,
-    });
+GoogleMaps.prototype.initBtns = function () {
+    let self = this;
 
-    // btns
-    if (this.options.printable) {
-        var $printBtn = $('<div class="btn-gmaps margin-right-10" role="button" id="map-print"><i class="fa fa-print"></i></div>');
-        $(this.options.div).prepend($printBtn);
-        this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($printBtn[0]);
+    if (self.options.printable) {
+        let $printBtn = $('<div class="btn-gmaps margin-right-10" role="button" id="map-print"><i class="fa fa-print"></i></div>');
+        $(self.options.div).prepend($printBtn);
+        self.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($printBtn[0]);
 
-        google.maps.event.addDomListener($printBtn[0], 'click', function (event) {
+        google.maps.event.addDomListener($printBtn[0], 'click', function () {
             self.print();
         });
     }
 
-    if (this.options.locationable) {
-        var $showLocationBtn = $('<div class="btn-gmaps margin-right-10 margin-bottom-10" role="button" id="map-location"><i class="fa fa-location-arrow"></i></div>');
-        $(this.options.div).prepend($showLocationBtn);
-        this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($showLocationBtn[0]);
+    if (self.options.locationable) {
+        let $showLocationBtn = $('<div class="btn-gmaps margin-right-10 margin-bottom-10" role="button" id="map-location"><i class="fa fa-location-arrow"></i></div>');
+        $(self.options.div).prepend($showLocationBtn);
+        self.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($showLocationBtn[0]);
 
-        google.maps.event.addDomListener($showLocationBtn[0], 'click', function (event) {
+        google.maps.event.addDomListener($showLocationBtn[0], 'click', function () {
             self.showLocation();
         });
     }
 
-    if (this.options.streetviewable) {
-        var $streetViewBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" role="button" id="map-street-view"><i class="fa fa-street-view"></i></div>');
-        $(this.options.div).prepend($streetViewBtn);
-        this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($streetViewBtn[0]);
+    if (self.options.streetviewable) {
+        let $streetViewBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" role="button" id="map-street-view"><i class="fa fa-street-view"></i></div>');
+        $(self.options.div).prepend($streetViewBtn);
+        self.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($streetViewBtn[0]);
 
-        google.maps.event.addDomListener($streetViewBtn[0], 'click', function (event) {
+        google.maps.event.addDomListener($streetViewBtn[0], 'click', function () {
             self.toggleStreetView();
         });
 
         self.setPanorama();
     }
 
-    if (this.options.fitzoomable) {
-        var $fitZoomBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" role="button" id="map-street-view"><i class="fa fa-window-restore"></i></div>');
-        $(this.options.div).prepend($fitZoomBtn);
-        this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($fitZoomBtn[0]);
+    if (self.options.fitzoomable) {
+        let $fitZoomBtn = $('<div class="btn-gmaps margin-bottom-10 margin-right-10" role="button" id="map-street-view"><i class="fa fa-window-restore"></i></div>');
+        $(self.options.div).prepend($fitZoomBtn);
+        self.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push($fitZoomBtn[0]);
 
-        google.maps.event.addDomListener($fitZoomBtn[0], 'click', function (event) {
+        google.maps.event.addDomListener($fitZoomBtn[0], 'click', function () {
             self.fitZoom();
         });
     }
 
 
     // events
-    google.maps.event.addListener(this.map, 'zoom_changed', function (event) {
+    google.maps.event.addListener(this.map, 'zoom_changed', function () {
         if (self.options.hideCustomMarkers) {
             if (self.map.zoom <= 11) {
                 self.hideCustomMarkers();
@@ -97,13 +108,11 @@ function GoogleMaps(options) {
             }
         }
     });
-
-    $.extend(this.options, options);
 };
 
 // Set street view pos
 GoogleMaps.prototype.setPanorama = function (latlng) {
-    var self = this;
+    let self = this;
     latlng = latlng || self.options.latlng;
 
     self.panorama = self.map.getStreetView();
@@ -116,24 +125,20 @@ GoogleMaps.prototype.setPanorama = function (latlng) {
 
 // Toggle street view
 GoogleMaps.prototype.toggleStreetView = function () {
-    console.log('toggleStreetView');
-
-    var self = this;
+    let self = this;
     self.panorama.setVisible(!self.panorama.getVisible());
 };
 
 // Show your location
 GoogleMaps.prototype.showLocation = function () {
-    console.log('ShowLocation');
-
-    var self = this;
+    let self = this;
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function (position) {
                 self.resetObject(self.objects.markers.location);
 
-                var latlng = {
+                let latlng = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
@@ -169,23 +174,23 @@ GoogleMaps.prototype.showLocation = function () {
 GoogleMaps.prototype.print = function () {
     console.log('print');
 
-    var $body = $('body');
-    var $mapContainer = $(this.options.div);
-    var $mapContainerParent = $mapContainer.parent();
-    var $printContainer = $('<div style="position: relative;">');
+    let $body = $('body');
+    let $mapContainer = $(this.options.div);
+    let $mapContainerParent = $mapContainer.parent();
+    let $printContainer = $('<div style="position: relative;">');
 
     $printContainer
         .height($mapContainer.height())
         .append($mapContainer)
         .prependTo($body);
 
-    var $content = $body
+    let $content = $body
         .children()
         .not($printContainer)
         .not('script')
         .detach();
 
-    var $patchedStyle = $('<style media="print" id="gmaps-print-style">')
+    let $patchedStyle = $('<style media="print" id="gmaps-print-style">')
         .text(
             'img { max-width: none !important; }' +
             'img.gm-fullscreen-control { display: none !important; }' +
@@ -205,22 +210,23 @@ GoogleMaps.prototype.print = function () {
 
 // Get random point in polygon
 GoogleMaps.prototype.getRandomPoint = function (coordinate) {
-    var polygon = new google.maps.Polygon({
+    let latlng = {};
+    let polygon = new google.maps.Polygon({
         paths: coordinate
     });
 
-    var bounds = new google.maps.LatLngBounds();
-    for (var i = 0; i < polygon.getPath().getLength(); i++) {
+    let bounds = new google.maps.LatLngBounds();
+    for (let i = 0; i < polygon.getPath().getLength(); i++) {
         bounds.extend(polygon.getPath().getAt(i));
     }
 
-    var sw = bounds.getSouthWest();
-    var ne = bounds.getNorthEast();
+    let sw = bounds.getSouthWest();
+    let ne = bounds.getNorthEast();
 
     do {
-        var lat = Math.random() * (ne.lat() - sw.lat()) + sw.lat();
-        var lng = Math.random() * (ne.lng() - sw.lng()) + sw.lng();
-        var latlng = new google.maps.LatLng(lat, lng);
+        let lat = Math.random() * (ne.lat() - sw.lat()) + sw.lat();
+        let lng = Math.random() * (ne.lng() - sw.lng()) + sw.lng();
+        latlng = new google.maps.LatLng(lat, lng);
     }
     while (!google.maps.geometry.poly.containsLocation(latlng, polygon));
 
@@ -234,7 +240,7 @@ GoogleMaps.prototype.getSize = function (polygon) {
 
 // Set polygon size to input
 GoogleMaps.prototype.setSizeInput = function (m2) {
-    var ha = parseInt(m2 / 10000);
+    let ha = parseInt(m2 / 10000);
     if ($('[name=size]').length) $('[name=size]').val(ha);
 };
 
@@ -245,10 +251,7 @@ GoogleMaps.prototype.resetSizeInput = function () {
 
 // Set your location, fill inputs: lat, lng
 GoogleMaps.prototype.setLocation = function (options) {
-    console.log('setLocation');
-
     let self = this;
-
 
     if (navigator.geolocation) {
         self.resetDrawingManager();
@@ -308,14 +311,13 @@ GoogleMaps.prototype.setLocation = function (options) {
     } else {
         console.log('Geolocation is not supported by this browser.');
     }
-}
+};
 
 // Geocode address to latlng
 GoogleMaps.prototype.geocode = function (address, callback) {
-    var self = this;
-    var geocoder = new google.maps.Geocoder();
+    let geocoder = new google.maps.Geocoder();
     geocoder.geocode({'address': address}, function (results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
+        if (status === google.maps.GeocoderStatus.OK) {
             if (typeof callback === 'function') {
                 callback(results[0].geometry.location);
             }
@@ -341,7 +343,7 @@ GoogleMaps.prototype.setZoom = function (zoom) {
 
 // Convert coordinates to paths
 GoogleMaps.prototype.coordinates2paths = function (coordinates) {
-    var paths = coordinates;
+    let paths = coordinates;
     if (typeof coordinates[0].lat === 'undefined') {
         if (!Array.isArray(coordinates[0])) {
             return {
@@ -364,7 +366,7 @@ GoogleMaps.prototype.coordinates2paths = function (coordinates) {
 
 // Push to object (example: this.options.markers)
 GoogleMaps.prototype.push2object = function (str, value) {
-    var obj = this.walkObject(this.objects, str);
+    let obj = this.walkObject(this.objects, str);
     if (obj) obj.push(value);
 };
 
@@ -379,27 +381,28 @@ GoogleMaps.prototype.walkObject = function (obj, str) {
         if (typeof o[x] === 'undefined') o[x] = [];
         return o[x];
     }, obj);
-}
+};
 
 // Add heatmap
 GoogleMaps.prototype.addHeatmap = function (coordinates) {
-    var self = this;
-    var data = [];
-    var paths = self.coordinates2paths(coordinates);
+    let self = this;
+    let data = [];
+    let paths = self.coordinates2paths(coordinates);
+
     $.each(paths, function (index, val) {
-        latlng = new google.maps.LatLng(val.lat, val.lng);
+        let latlng = new google.maps.LatLng(val.lat, val.lng);
 
         data.push(latlng);
         self.bounds.extend(latlng);
     });
 
-    var heatmap = new google.maps.visualization.HeatmapLayer({
+    let heatmap = new google.maps.visualization.HeatmapLayer({
         data: data,
         map: self.map
     });
 
     this.push2object('heatmap', heatmap);
-}
+};
 
 // Add marker
 GoogleMaps.prototype.addMarker = function (latlng, options) {
@@ -472,17 +475,17 @@ GoogleMaps.prototype.addMarkerEvents = function (marker, callback) {
     google.maps.event.addListener(marker, 'dragend', function () {
         callback(marker);
     });
-}
+};
 
 // Add polygon
 GoogleMaps.prototype.addPolygon = function (coordinates, options) {
-    var self = this;
-    var options = options || {};
+    let self = this;
+    options = options || {};
     options.to = options.to || 'polygons';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
 
-    var paths = this.coordinates2paths(coordinates);
-    var polygon = new google.maps.Polygon({
+    let paths = this.coordinates2paths(coordinates);
+    let polygon = new google.maps.Polygon({
         paths: paths,
         strokeColor: options.strokeColor || '#1ab394',
         strokeOpacity: options.strokeOpacity || 0.8,
@@ -492,7 +495,8 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
         draggable: options.draggable || false,
         editable: options.editable || false
     });
-
+    polygon.id = options.id || self.guid();
+    polygon.type = options.type || 'polygon';
     polygon.setMap(this.map);
 
     // this.objects.polygons.push(polygon);
@@ -505,7 +509,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     }
 
     if (typeof options.label !== 'undefined') {
-        var customMarker = new CustomMarker(
+        let customMarker = new CustomMarker(
             polygon.getApproximateCenter(), // polygon.getBounds().getCenter(),
             this.map,
             {
@@ -563,13 +567,13 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
 };
 
 GoogleMaps.prototype.addPolyline = function (coordinates, options) {
-    var self = this;
-    var options = options || {};
-    options.to = options.to || 'polygons';
+    let self = this;
+    options = options || {};
+    options.to = options.to || 'polylines';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
 
-    var paths = this.coordinates2paths(coordinates);
-    var polyline = new google.maps.Polyline({
+    let paths = this.coordinates2paths(coordinates);
+    let polyline = new google.maps.Polyline({
         paths: paths,
         strokeColor: options.strokeColor || '#1ab394',
         strokeOpacity: options.strokeOpacity || 0.8,
@@ -577,7 +581,8 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
         draggable: options.draggable || false,
         editable: options.editable || false
     });
-
+    polyline.id = options.id || self.guid();
+    polyline.type = options.type || 'polyline';
     polyline.setMap(this.map);
 
     // this.objects.polylines.push(polyline);
@@ -590,7 +595,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     }
 
     if (typeof options.label !== 'undefined') {
-        var customMarker = new CustomMarker(
+        let customMarker = new CustomMarker(
             polyline.getApproximateCenter(), // polygon.getBounds().getCenter(),
             this.map,
             {
@@ -638,7 +643,7 @@ GoogleMaps.prototype.addPolylineEvents = function (polyline, callback) {
 
 // Add infoWindow
 GoogleMaps.prototype.addInfoWindow = function (object, options) {
-    var options = options || {};
+    options = options || {};
     if (typeof options.content !== 'undefined') {
         object.info = new google.maps.InfoWindow({
             content: options.content
@@ -653,7 +658,7 @@ GoogleMaps.prototype.addInfoWindow = function (object, options) {
 
 // Marker clusterer
 GoogleMaps.prototype.addMarkerCluster = function (icon) {
-    var self = this;
+    let self = this;
     $.each(this.objects.markers, function (index, val) {
         // this.markerCluster = new MarkerClusterer(self.map, self.objects.markers, {
         self.markerCluster[index] = new MarkerClusterer(self.map, val, {
@@ -675,15 +680,15 @@ GoogleMaps.prototype.guid = function () {
 
 // Add drawing manager
 GoogleMaps.prototype.addDrawingManager = function (options) {
-    var self = this;
-    var options = options || {};
+    let self = this;
+    options = options || {};
     options.drawingModes = options.drawingModes || ['marker', 'polygon'];
 
     options.markerOptions = options.markerOptions || {};
     options.polygonOptions = options.polygonOptions || {};
     options.polylineOptions = options.polylineOptions || {};
 
-    var polylineArrowOptions = {};
+    let polylineArrowOptions = {};
     if ((index = options.drawingModes.indexOf('polyline-arrow')) >= 0) {
         options.drawingModes.splice(index, 1);
 
@@ -709,7 +714,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             draggable: true,
             icon: options.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png',
 
-            max: options.markerOptions.max || 1,
+            max: options.markerOptions.max || null,
             callback: options.markerOptions.callback || null
         },
         polygonOptions: {
@@ -722,7 +727,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             draggable: options.draggable || false,
             zIndex: 1,
 
-            max: options.polygonOptions.max || 1,
+            max: options.polygonOptions.max || null,
             callback: options.polygonOptions.callback || null
         },
         polylineOptions: Object.assign(
@@ -733,7 +738,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
                 editable: true,
                 draggable: options.draggable || false,
 
-                max: options.polylineOptions.max || 1,
+                max: options.polylineOptions.max || null,
                 callback: options.polylineOptions.callback || null
             },
             polylineArrowOptions
@@ -743,7 +748,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     self.drawingManager.setMap(this.map);
 
     $('#draw-reset').remove();
-    $reset = $('<div class="btn-gmaps btn-gmaps-xs margin-top-5" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
+    let $reset = $('<div class="btn-gmaps btn-gmaps-xs margin-top-5" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
     $(this.options.div).prepend($reset);
     this.map.controls[google.maps.ControlPosition.TOP_CENTER].push($reset[0]);
 
@@ -757,12 +762,11 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     }
 
     self.addDrawingManagerEvents(self.drawingManager, $reset);
-
 };
 
 // Drawing manager events
 GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset) {
-    var self = this;
+    let self = this;
 
     // hide delete btn
     google.maps.event.addListener(this.map, 'click', function () {
@@ -794,7 +798,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
             let indexOf = drawingManager.drawingControlOptions.drawingModes.indexOf(type);
             if (indexOf === -1) {
                 drawingManager.drawingControlOptions.drawingModes.push(type);
-                drawingManager.setDrawingMode(type);
+                drawingManager.setDrawingMode(null);
                 drawingManager.setMap(self.map);
             }
         }
@@ -858,8 +862,9 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
         });
         overlay.callback(overlay);
 
-        let count = Object.keys(self.objects.customDraws[event.type]).length;
-        if (drawingManager[overlay.type + 'Options'].max <= count) {
+        let count = Object.keys(self.objects.customDraws[overlay.type]).length;
+        let max = drawingManager[overlay.type + 'Options'].max;
+        if (max !== null && max <= count) {
             let indexOf = drawingManager.drawingControlOptions.drawingModes.indexOf(overlay.type);
             drawingManager.drawingControlOptions.drawingModes.splice(indexOf, 1);
             drawingManager.setDrawingMode(null);
@@ -898,18 +903,19 @@ GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
 };
 
 GoogleMaps.prototype.stringToObject = function (key, value) {
-    var result = object = {};
-    var arr = key.split('.');
-    for (var i = 0; i < arr.length - 1; i++) {
+    let result = object = {};
+    let arr = key.split('.');
+    for (let i = 0; i < arr.length - 1; i++) {
         object = object[arr[i]] = {};
     }
     object[arr[arr.length - 1]] = value;
+
     return result;
-}
+};
 
 // Reset map
 GoogleMaps.prototype.reset = function (objects) {
-    var self = this;
+    let self = this;
 
     // TODO Refactor
     var objects = objects || null;
@@ -971,7 +977,7 @@ GoogleMaps.prototype.resetDrawingManagerInput = function (overlayId) {
 
 // Show custom markers (polygon title)
 GoogleMaps.prototype.showCustomMarkers = function () {
-    var self = this;
+    let self = this;
     $.each(this.objects.customMarkers, function (index, val) {
         val.setMap(self.map);
     });

@@ -94,7 +94,10 @@
         ];
         gmaps.addPolygon(coordinates, {
             label: '<div class="custom-marker">Label for Hungary Polygon</div>',
-            infoWindow: 'InfoWindow for Hungary Polygon'
+            infoWindow: 'InfoWindow for Hungary Polygon',
+
+            bounds: true,
+            editable: true,
         });
 
         gmaps.fitZoom();
@@ -106,7 +109,8 @@
     var initDrawingManager = function (gmaps) {
 //        gmaps.resetDrawingManager();
         gmaps.addDrawingManager({
-            drawingModes: ['marker', 'polygon', 'polyline-arrow'],
+//            drawingModes: ['marker', 'polygon', 'polyline-arrow'],
+            drawingModes: ['marker', 'polygon', 'polyline'],
             markerOptions: {
                 max: 3,
                 // callback: callback
