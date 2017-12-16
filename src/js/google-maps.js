@@ -172,8 +172,6 @@ GoogleMaps.prototype.showLocation = function () {
 
 // Print
 GoogleMaps.prototype.print = function () {
-    console.log('print');
-
     let $body = $('body');
     let $mapContainer = $(this.options.div);
     let $mapContainerParent = $mapContainer.parent();
@@ -364,20 +362,22 @@ GoogleMaps.prototype.coordinates2paths = function (coordinates) {
     return paths;
 };
 
-// Push to object (example: this.options.markers)
-GoogleMaps.prototype.push2object = function (str, value) {
-    let obj = this.walkObject(this.objects, str);
+GoogleMaps.prototype.push2object = function (object, path, value) {
+    let obj = this.walkObject(object, path);
     if (obj) obj.push(value);
 };
 
-GoogleMaps.prototype.walkObject = function (obj, str) {
-    /*array = str.split(".");
-     for (var i = 0; i < array.length; i++) {
-     obj = obj[array[i]];
-     }
-     return obj;*/
+GoogleMaps.prototype.str2object = function (obj, path, value) {
+    let parts = path.split("."), part;
+    while (part = parts.shift()) {
+        if (typeof obj[part] !== "object") obj[part] = {};
+        obj = obj[part]; // update "pointer"
+    }
+    obj["_x"] = value;
+};
 
-    return str.split(".").reduce(function (o, x) {
+GoogleMaps.prototype.walkObject = function (obj, path) {
+    return path.split(".").reduce(function (o, x) {
         if (typeof o[x] === 'undefined') o[x] = [];
         return o[x];
     }, obj);
@@ -401,7 +401,7 @@ GoogleMaps.prototype.addHeatmap = function (coordinates) {
         map: self.map
     });
 
-    this.push2object('heatmap', heatmap);
+    this.push2object(self.objects, 'heatmap', heatmap);
 };
 
 // Add marker
@@ -447,11 +447,14 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
 
         // this.objects.markers.push(marker);
         // this.objects.markers[options.to].push(marker);
-        this.push2object(options.to, marker);
+
+        this.push2object(self.objects, options.to, marker);
+        // this.str2object(self.objects, options.to + '.' + marker.id, marker);
+
         this.bounds.extend(latlng);
 
         // add infoWindow
-        if (typeof(options.infoWindow) !== 'undefined') {
+        if (typeof options.infoWindow !== 'undefined') {
             this.addInfoWindow(marker, {
                 content: options.infoWindow
             });
@@ -459,6 +462,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
     }
 
     self.addMarkerEvents(marker, options.callback);
+
     return marker;
 };
 
@@ -500,7 +504,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     polygon.setMap(this.map);
 
     // this.objects.polygons.push(polygon);
-    this.push2object(options.to, polygon);
+    this.push2object(self.objects, options.to, polygon);
 
     if (options.bounds) {
         $.each(paths, function (index, val) {
@@ -537,7 +541,6 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
     if (typeof callback !== 'function') {
         callback = function (polygon) {
             self.setDrawingManagerInput(polygon);
-            console.log(polygon.getPath().getArray());
         }
     }
 
@@ -551,18 +554,15 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
     google.maps.event.addListener(polygon, 'dragend', function () {
         callback(polygon);
     });
-    polygon.getPaths().forEach(function (path, index) {
-        google.maps.event.addListener(path, 'insert_at', function () {
-            callback(polygon);
-        });
 
-        google.maps.event.addListener(path, 'remove_at', function () {
-            callback(polygon);
-        });
-
-        google.maps.event.addListener(path, 'set_at', function () {
-            callback(polygon);
-        });
+    google.maps.event.addListener(polygon.getPath(), 'insert_at', function () {
+        callback(polygon);
+    });
+    google.maps.event.addListener(polygon.getPath(), 'remove_at', function () {
+        callback(polygon);
+    });
+    google.maps.event.addListener(polygon.getPath(), 'set_at', function () {
+        callback(polygon);
     });
 };
 
@@ -586,7 +586,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     polyline.setMap(this.map);
 
     // this.objects.polylines.push(polyline);
-    this.push2object(options.to, polyline);
+    this.push2object(self.objects, options.to, polyline);
 
     if (options.bounds) {
         $.each(paths, function (index, val) {
@@ -623,21 +623,26 @@ GoogleMaps.prototype.addPolylineEvents = function (polyline, callback) {
         }
     }
 
+    /*let strokeOpacity = polyline.strokeOpacity;
+     google.maps.event.addListener(polyline, 'mouseover', function () {
+     this.setOptions({strokeOpacity: .2});
+     });
+     google.maps.event.addListener(polyline, 'mouseout', function () {
+     this.setOptions({strokeOpacity: strokeOpacity});
+     });*/
+
     google.maps.event.addListener(polyline, 'dragend', function () {
         callback(polyline);
     });
-    polyline.getPath().forEach(function (path, index) {
-        google.maps.event.addListener(path, 'insert_at', function () {
-            callback(polyline);
-        });
 
-        google.maps.event.addListener(path, 'remove_at', function () {
-            callback(polyline);
-        });
-
-        google.maps.event.addListener(path, 'set_at', function () {
-            callback(polyline);
-        });
+    google.maps.event.addListener(polyline.getPath(), 'insert_at', function () {
+        callback(polyline);
+    });
+    google.maps.event.addListener(polyline.getPath(), 'remove_at', function () {
+        callback(polyline);
+    });
+    google.maps.event.addListener(polyline.getPath(), 'set_at', function () {
+        callback(polyline);
     });
 };
 
@@ -689,7 +694,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     options.polylineOptions = options.polylineOptions || {};
 
 
-    if(options.polylineOptions.icons == 'arrow') {
+    if (options.polylineOptions.icons == 'arrow') {
         options.polylineOptions.icons = [{
             icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
             offset: '100%',
@@ -777,6 +782,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
         $.each(object, function (index, value) {
             if (value && value.id == id) {
                 self.resetDrawingManagerInput(id);
+                self.resetCoordinatesSession(id, type);
                 object[index].setMap(null);
                 delete object[index];
             }
@@ -843,7 +849,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
                 self.addPolylineEvents(overlay, overlay.callback);
                 break;
         }
-        self.push2object('customDraws.' + overlay.type, overlay);
+        self.push2object(self.objects, 'customDraws.' + overlay.type, overlay);
 
         google.maps.event.addListener(overlay, 'click', function () {
             $reset = $('#draw-reset');
@@ -885,25 +891,61 @@ GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
         $input.attr({
             'name': 'coordinates[' + overlay.type + '][]',
             'class': 'input-gmaps hidden',
-            'data-id': overlay.id
+            'data-id': overlay.id,
+            'data-type': overlay.type,
         });
         $(self.options.div).prepend($input);
     }
     $input.attr('value', coordinates);
-    let session = self.stringToObject('coordinates.' + overlay.type + '.' + overlay.id, coordinates);
-    $.session.set(window.location.href, JSON.stringify(session));
-    // if ($.session.get(window.location.href)) console.log(JSON.parse($.session.get(window.location.href)));
+
+    // $.session.clear();
+    self.setCoordinatesSession(overlay, coordinates);
+
 };
 
-GoogleMaps.prototype.stringToObject = function (key, value) {
-    let result = object = {};
-    let arr = key.split('.');
-    for (let i = 0; i < arr.length - 1; i++) {
-        object = object[arr[i]] = {};
+GoogleMaps.prototype.getCoordinatesSession = function () {
+    let session = $.session.get(window.location.href);
+    if (typeof session !== 'undefined') {
+        session = JSON.parse($.session.get(window.location.href));
     }
-    object[arr[arr.length - 1]] = value;
 
-    return result;
+    return session;
+};
+
+GoogleMaps.prototype.setCoordinatesSession = function (overlay, coordinates) {
+    let session = this.getCoordinatesSession();
+    if (typeof session === 'undefined') session = {};
+
+    // this.push2object(session, this.options.div + '.coordinates.' + overlay.type + '.' + overlay.id, coordinates);
+    $.session.set(window.location.href, JSON.stringify(session));
+
+    return session;
+};
+
+GoogleMaps.prototype.resetCoordinatesSession = function (id, type) {
+    let session = this.getCoordinatesSession();
+
+    if (typeof type !== 'undefined' && typeof id !== 'undefined') {
+        let exists = this.objectIsExists(session, [this.options.div, 'coordinates', type, id]);
+        if (exists) delete session[this.options.div]['coordinates'][type][id];
+
+    } else {
+        let exists = this.objectIsExists(session, [this.options.div, 'coordinates']);
+        if (exists) delete session[this.options.div]['coordinates'];
+    }
+    $.session.set(window.location.href, JSON.stringify(session));
+};
+
+GoogleMaps.prototype.objectIsExists = function (obj, args) {
+    // let args = Array.prototype.slice.call(arguments, 1);
+    for (let i = 0; i < args.length; i++) {
+        if (!obj || !obj.hasOwnProperty(args[i])) {
+            return false;
+        }
+        obj = obj[args[i]];
+    }
+
+    return true;
 };
 
 // Reset map
@@ -911,6 +953,7 @@ GoogleMaps.prototype.reset = function (objects) {
     let self = this;
 
     // TODO Refactor
+    self.resetCoordinatesSession();
     var objects = objects || null;
     if (objects) {
         $.each(objects, function (index, value) {
