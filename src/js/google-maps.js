@@ -688,17 +688,12 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     options.polygonOptions = options.polygonOptions || {};
     options.polylineOptions = options.polylineOptions || {};
 
-    let polylineArrowOptions = {};
-    if ((index = options.drawingModes.indexOf('polyline-arrow')) >= 0) {
-        options.drawingModes.splice(index, 1);
 
-        if ((index = options.drawingModes.indexOf('polyline')) < 0) options.drawingModes.push('polyline');
-        polylineArrowOptions = {
-            icons: [{
-                icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
-                offset: '100%',
-            }]
-        };
+    if(options.polylineOptions.icons == 'arrow') {
+        options.polylineOptions.icons = [{
+            icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
+            offset: '100%',
+        }];
     }
 
     self.drawingManager = new google.maps.drawing.DrawingManager({
@@ -718,31 +713,29 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             callback: options.markerOptions.callback || null
         },
         polygonOptions: {
-            strokeColor: options.strokeColor || '#F75C54',
+            strokeColor: options.polygonOptions.strokeColor || '#F75C54',
             strokeOpacity: 0.9,
             strokeWeight: 2,
-            fillColor: options.fillColor || '#F75C54',
+            fillColor: options.polygonOptions.fillColor || '#F75C54',
             fillOpacity: 0.35,
             editable: true,
-            draggable: options.draggable || false,
+            draggable: options.polygonOptions.draggable || false,
             zIndex: 1,
 
             max: options.polygonOptions.max || null,
             callback: options.polygonOptions.callback || null
         },
-        polylineOptions: Object.assign(
-            {
-                strokeColor: options.strokeColor || '#F75C54',
-                strokeOpacity: 0.9,
-                strokeWeight: 2,
-                editable: true,
-                draggable: options.draggable || false,
+        polylineOptions: {
+            strokeColor: options.polylineOptions.strokeColor || '#F75C54',
+            strokeOpacity: 0.9,
+            strokeWeight: 2,
+            editable: true,
+            draggable: options.polylineOptions.draggable || false,
+            icons: options.polylineOptions.icons || null,
 
-                max: options.polylineOptions.max || null,
-                callback: options.polylineOptions.callback || null
-            },
-            polylineArrowOptions
-        ),
+            max: options.polylineOptions.max || null,
+            callback: options.polylineOptions.callback || null
+        },
 
     });
     self.drawingManager.setMap(this.map);

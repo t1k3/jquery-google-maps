@@ -109,11 +109,17 @@
     var initDrawingManager = function (gmaps) {
 //        gmaps.resetDrawingManager();
         gmaps.addDrawingManager({
-//            drawingModes: ['marker', 'polygon', 'polyline-arrow'],
             drawingModes: ['marker', 'polygon', 'polyline'],
             markerOptions: {
                 max: 3,
                 // callback: callback
+            },
+            polylineOptions: {
+                strokeColor: 'black',
+//                icons: 'arrow',
+            },
+            polygonOptions: {
+                fillColor: 'transparent',
             },
             drawingControl: true,
         });
