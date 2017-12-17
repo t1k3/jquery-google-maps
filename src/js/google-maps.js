@@ -574,7 +574,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
 
     let paths = this.coordinates2paths(coordinates);
     let polyline = new google.maps.Polyline({
-        paths: paths,
+        path: paths,
         strokeColor: options.strokeColor || '#1ab394',
         strokeOpacity: options.strokeOpacity || 0.8,
         strokeWeight: options.strokeWeight || 2,
@@ -596,7 +596,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
 
     if (typeof options.label !== 'undefined') {
         let customMarker = new CustomMarker(
-            polyline.getApproximateCenter(), // polygon.getBounds().getCenter(),
+            polyline.getApproximateCenter(),
             this.map,
             {
                 content: options.label

@@ -101,7 +101,16 @@
         });
 
         gmaps.fitZoom();
-    }
+    };
+    var initPolyline = function(gmaps) {
+        var coordinates = [[48.210032122340415, 26.806640625],[44.22945656830167, 22.7197265625]];
+        gmaps.addPolyline(coordinates, {
+            strokeColor: 'red',
+            label: '<div class="custom-marker">Label for Transylvania Polyline</div>',
+            infoWindow: 'InfoWindow for Transylvania Polyline',
+            editable: true,
+        });
+    };
 
     var callback = function (marker) {
         console.log(marker.id, marker.getPosition().lat(), marker.getPosition().lng());
@@ -162,6 +171,7 @@
             hideCustomMarkers: false,
         });
         initPolygon(gmapsPolygon);
+        initPolyline(gmapsPolygon);
 
         // draw
         var gmapsDraw = new GoogleMaps({
@@ -195,7 +205,7 @@
             fullscreenControl: true,
             streetViewControl: true,
         });
-        gmapsLocation.setLocation({
+       gmapsLocation.setLocation({
             callback: function (latlng) {
                 console.log('setLocation callback', latlng);
             },
