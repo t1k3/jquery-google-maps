@@ -444,6 +444,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
             draggable: options.draggable || false,
             icon: options.icon, // 'https://maps.google.com/mapfiles/ms/micons/green.png',
             visible: typeof options.visible !== 'undefined' ? options.visible : true,
+            label: options.label,
         });
         marker.id = options.id || self.guid();
         marker.type = options.type || 'marker';
