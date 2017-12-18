@@ -572,6 +572,13 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     options.to = options.to || 'polylines';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
 
+    if (options.icons == 'arrow') {
+        options.icons = [{
+            icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
+            offset: '100%',
+        }];
+    }
+
     let paths = this.coordinates2paths(coordinates);
     let polyline = new google.maps.Polyline({
         path: paths,
@@ -579,7 +586,8 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
         strokeOpacity: options.strokeOpacity || 0.8,
         strokeWeight: options.strokeWeight || 2,
         draggable: options.draggable || false,
-        editable: options.editable || false
+        editable: options.editable || false,
+        icons: options.icons ? options.icons : '',
     });
     polyline.id = options.id || self.guid();
     polyline.type = options.type || 'polyline';
