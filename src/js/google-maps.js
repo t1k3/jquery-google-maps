@@ -701,9 +701,21 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     options.drawingModes = options.drawingModes || ['marker', 'polygon'];
 
     options.markerOptions = options.markerOptions || {};
+    options.markerOptions.icon = options.markerOptions.icon || '';
+
     options.polygonOptions = options.polygonOptions || {};
     options.polylineOptions = options.polylineOptions || {};
 
+    if (typeof options.markerOptions.icon === 'string' && options.markerOptions.icon !== '') {
+        let markerIcon = options.markerOptions.icon;
+        options.markerOptions.icon = {
+            url: markerIcon,
+            // scaledSize: new google.maps.Size(21, 34),
+            // scaledSize: new google.maps.Size(32, 37),
+            // origin: new google.maps.Point(0, 0),
+            // anchor: new google.maps.Point(-5, 17)
+        };
+    }
 
     if (options.polylineOptions.icons == 'arrow') {
         options.polylineOptions.icons = [{
@@ -723,7 +735,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         },
         markerOptions: {
             draggable: true,
-            icon: options.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png',
+            icon: options.markerOptions.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png',
 
             max: options.markerOptions.max || null,
             callback: options.markerOptions.callback || null
