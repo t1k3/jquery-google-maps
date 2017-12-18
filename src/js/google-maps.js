@@ -97,14 +97,60 @@ GoogleMaps.prototype.initBtns = function () {
         });
     }
 
+    let $reset = $('<div class="btn-gmaps btn-gmaps-xs margin-top-5" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
+    $(self.options.div).prepend($reset);
+    this.map.controls[google.maps.ControlPosition.TOP_CENTER].push($reset[0]);
+    $reset.hide();
 
-    // events
-    google.maps.event.addListener(this.map, 'zoom_changed', function () {
+
+    // map zoom_changed
+    google.maps.event.addListener(self.map, 'zoom_changed', function () {
         if (self.options.hideCustomMarkers) {
             if (self.map.zoom <= 11) {
                 self.hideCustomMarkers();
             } else if (self.map.zoom >= 12) {
                 self.showCustomMarkers();
+            }
+        }
+    });
+
+    // hide delete btn
+    google.maps.event.addListener(self.map, 'click', function () {
+        if ($reset.is(':visible')) $reset.hide();
+    });
+    google.maps.event.addDomListener($('[role=button]')[0], 'click', function () {
+        if ($reset.is(':visible')) $reset.hide();
+    });
+
+    // delete btn click
+    google.maps.event.addDomListener($reset[0], 'click', function () {
+        let id = $(this).attr('data-id');
+        let type = $(this).attr('data-object'); // marker, polygon, polyline
+        let object = self.objects.customDraws[type];
+
+        $.each(object, function (index, value) {
+            if (value && value.id == id) {
+                self.resetDrawingManagerInput(id);
+                self.resetCoordinatesSession(id, type);
+                object[index].setMap(null);
+                delete object[index];
+            }
+        });
+
+        $(this).removeAttr('data-id');
+        $(this).removeAttr('data-object');
+        $(this).hide();
+
+        let drawingManager = self.drawingManager;
+        if (drawingManager) {
+            let count = Object.keys(self.objects.customDraws[type]).length;
+            if (drawingManager[type + 'Options'].max > count) {
+                let indexOf = drawingManager.drawingControlOptions.drawingModes.indexOf(type);
+                if (indexOf === -1) {
+                    drawingManager.drawingControlOptions.drawingModes.push(type);
+                    drawingManager.setDrawingMode(null);
+                    drawingManager.setMap(self.map);
+                }
             }
         }
     });
@@ -448,6 +494,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
         });
         marker.id = options.id || self.guid();
         marker.type = options.type || 'marker';
+        marker.deletable = options.deletable || false;
 
         // this.objects.markers.push(marker);
         // this.objects.markers[options.to].push(marker);
@@ -480,6 +527,8 @@ GoogleMaps.prototype.addMarkerEvents = function (marker, callback) {
         }
     }
 
+    if (marker.deletable) self.addOverlayDeleteEvent(marker, callback(marker));
+
     google.maps.event.addListener(marker, 'dragend', function () {
         callback(marker);
     });
@@ -505,6 +554,8 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     });
     polygon.id = options.id || self.guid();
     polygon.type = options.type || 'polygon';
+    polygon.deletable = options.deletable || false;
+
     polygon.setMap(this.map);
 
     // this.objects.polygons.push(polygon);
@@ -547,6 +598,8 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
             self.setDrawingManagerInput(polygon);
         }
     }
+
+    if (polygon.deletable) self.addOverlayDeleteEvent(polygon, callback(polygon));
 
     google.maps.event.addListener(polygon, 'mouseover', function () {
         this.setOptions({fillOpacity: .2});
@@ -595,6 +648,8 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     });
     polyline.id = options.id || self.guid();
     polyline.type = options.type || 'polyline';
+    polyline.deletable = options.deletable || false;
+
     polyline.setMap(this.map);
 
     // this.objects.polylines.push(polyline);
@@ -634,6 +689,8 @@ GoogleMaps.prototype.addPolylineEvents = function (polyline, callback) {
             self.setDrawingManagerInput(polyline);
         }
     }
+
+    if (polyline.deletable) self.addOverlayDeleteEvent(polyline, callback(polyline));
 
     /*let strokeOpacity = polyline.strokeOpacity;
      google.maps.event.addListener(polyline, 'mouseover', function () {
@@ -725,6 +782,18 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         }];
     }
 
+    $.each(options.drawingModes, function (index, value) {
+        let exists = typeof self.objects.customDraws[value] !== 'undefined';
+        if (exists) {
+            let count = Object.keys(self.objects.customDraws[value]).length;
+            let max = options[value + 'Options'].max;
+            if (max !== null && max <= count) {
+                let indexOf = options.drawingModes.indexOf(value);
+                options.drawingModes.splice(indexOf, 1);
+            }
+        }
+    });
+
     self.drawingManager = new google.maps.drawing.DrawingManager({
         // drawingMode: google.maps.drawing.OverlayType.MARKER,
         drawingMode: options.drawingModes[0],
@@ -769,13 +838,6 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     });
     self.drawingManager.setMap(this.map);
 
-    $('#draw-reset').remove();
-    let $reset = $('<div class="btn-gmaps btn-gmaps-xs margin-top-5" id="draw-reset"><i class="fa fa-trash-o"></i></div>');
-    $(this.options.div).prepend($reset);
-    this.map.controls[google.maps.ControlPosition.TOP_CENTER].push($reset[0]);
-
-    $reset.hide();
-
     if (typeof options.drawingControl !== 'undefined' && !options.drawingControl) {
         self.drawingManager.setDrawingMode(null);
         self.drawingManager.setMap(null);
@@ -783,49 +845,12 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         // $reset.show();
     }
 
-    self.addDrawingManagerEvents(self.drawingManager, $reset);
+    self.addDrawingManagerEvents(self.drawingManager);
 };
 
 // Drawing manager events
-GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset) {
+GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager) {
     let self = this;
-
-    // hide delete btn
-    google.maps.event.addListener(this.map, 'click', function () {
-        if ($reset.is(':visible')) $reset.hide();
-    });
-    google.maps.event.addDomListener($('[role=button]')[0], 'click', function () {
-        if ($reset.is(':visible')) $reset.hide();
-    });
-
-    // delete btn click
-    google.maps.event.addDomListener($reset[0], 'click', function () {
-        let id = $(this).attr('data-id');
-        let type = $(this).attr('data-object'); // marker, polygon, polyline
-        let object = self.objects.customDraws[type];
-        $.each(object, function (index, value) {
-            if (value && value.id == id) {
-                self.resetDrawingManagerInput(id);
-                self.resetCoordinatesSession(id, type);
-                object[index].setMap(null);
-                delete object[index];
-            }
-        });
-
-        $(this).removeAttr('data-id');
-        $(this).removeAttr('data-object');
-        $(this).hide();
-
-        let count = Object.keys(self.objects.customDraws[type]).length;
-        if (drawingManager[type + 'Options'].max > count) {
-            let indexOf = drawingManager.drawingControlOptions.drawingModes.indexOf(type);
-            if (indexOf === -1) {
-                drawingManager.drawingControlOptions.drawingModes.push(type);
-                drawingManager.setDrawingMode(null);
-                drawingManager.setMap(self.map);
-            }
-        }
-    });
 
     // overlaycomplete
     google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
@@ -875,14 +900,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
         }
         self.push2object(self.objects, 'customDraws.' + overlay.type, overlay);
 
-        google.maps.event.addListener(overlay, 'click', function () {
-            $reset = $('#draw-reset');
-
-            $reset.attr('data-id', overlay.id);
-            $reset.attr('data-object', overlay.type);
-            $reset.show();
-
-        });
+        self.addOverlayDeleteEvent(overlay);
         overlay.callback(overlay);
 
         let count = Object.keys(self.objects.customDraws[overlay.type]).length;
@@ -894,6 +912,19 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager, $reset)
             drawingManager.setMap(self.map);
         }
     });
+};
+
+GoogleMaps.prototype.addOverlayDeleteEvent = function (overlay) {
+    let self = this;
+    google.maps.event.addListener(overlay, 'click', function () {
+        $reset = $(self.options.div).find('#draw-reset');
+
+        $reset.attr('data-id', overlay.id);
+        $reset.attr('data-object', overlay.type);
+        $reset.show();
+
+    });
+    if (typeof overlay.callback === 'function') overlay.callback(overlay);
 };
 
 // Set drawing manager inputs

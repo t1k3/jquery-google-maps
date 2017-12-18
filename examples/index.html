@@ -53,6 +53,13 @@
         gmaps.addMarker({lat: 47.508, lng: 19.0464}, {
             infoWindow: 'For marker (not) cluster',
             to: 'markers.places',
+        });
+
+        gmaps.addMarker({lat: 47.508, lng: 20.0464}, {
+            infoWindow: 'editMarker',
+            to: 'customDraws.marker',
+            draggable: true,
+            deletable: true,
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 10
@@ -114,6 +121,8 @@
             label: '<div class="custom-marker">Label for Transylvania Polyline</div>',
             infoWindow: 'InfoWindow for Transylvania Polyline',
             editable: true,
+            // deletable: true,
+            // to: 'customDraws.polyline',
             icons: 'arrow'
         });
     };
