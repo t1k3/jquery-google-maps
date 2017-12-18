@@ -51,7 +51,11 @@
 //        For marker (not) cluster(ed)
         gmaps.addMarker({lat: 47.508, lng: 19.0464}, {
             infoWindow: 'For marker (not) cluster',
-            to: 'markers.places'
+            to: 'markers.places',
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10
+            },
         });
 
         gmaps.addMarkerCluster();
@@ -102,8 +106,8 @@
 
         gmaps.fitZoom();
     };
-    var initPolyline = function(gmaps) {
-        var coordinates = [[48.210032122340415, 26.806640625],[44.22945656830167, 22.7197265625]];
+    var initPolyline = function (gmaps) {
+        var coordinates = [[48.210032122340415, 26.806640625], [44.22945656830167, 22.7197265625]];
         gmaps.addPolyline(coordinates, {
             strokeColor: 'red',
             label: '<div class="custom-marker">Label for Transylvania Polyline</div>',
@@ -206,7 +210,7 @@
             fullscreenControl: true,
             streetViewControl: true,
         });
-       gmapsLocation.setLocation({
+        gmapsLocation.setLocation({
             callback: function (latlng) {
                 console.log('setLocation callback', latlng);
             },

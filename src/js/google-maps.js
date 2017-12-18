@@ -408,7 +408,8 @@ GoogleMaps.prototype.addHeatmap = function (coordinates) {
 GoogleMaps.prototype.addMarker = function (latlng, options) {
     let self = this;
     let marker = null;
-    let markerIcon = '';
+
+    options.icon = options.icon || '';
 
     if (typeof latlng.lat === 'undefined') {
         latlng = self.coordinates2paths(latlng);
@@ -426,9 +427,10 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
         options = options || {};
         options.to = options.to || 'markers.places';
 
-        if (typeof options.icon !== 'undefined' && options.icon !== null) {
-            markerIcon = {
-                url: options.icon,
+        if (typeof options.icon === 'string' && options.icon !== '') {
+            let markerIcon = options.icon;
+            options.icon = {
+                url: markerIcon,
                 // scaledSize: new google.maps.Size(21, 34),
                 // scaledSize: new google.maps.Size(32, 37),
                 // origin: new google.maps.Point(0, 0),
@@ -440,7 +442,8 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
             position: latlng,
             map: this.map,
             draggable: options.draggable || false,
-            icon: markerIcon, // 'https://maps.google.com/mapfiles/ms/micons/green.png',
+            icon: options.icon, // 'https://maps.google.com/mapfiles/ms/micons/green.png',
+            visible: typeof options.visible !== 'undefined' ? options.visible : true,
         });
         marker.id = options.id || self.guid();
         marker.type = options.type || 'marker';
