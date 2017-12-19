@@ -1,5 +1,5 @@
 const path = require('path');
-// const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
@@ -20,7 +20,7 @@ module.exports = {
         ]
     },
     plugins: [
-        // new UglifyJSPlugin(),
+        new UglifyWebpackPlugin(),
         new ExtractTextPlugin('css/google-maps.min.css'),
     ],
 };
