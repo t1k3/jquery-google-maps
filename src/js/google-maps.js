@@ -971,9 +971,12 @@ GoogleMaps.prototype.setCoordinatesSession = function (overlay, coordinates) {
     let session = this.getCoordinatesSession();
     if (typeof session === 'undefined') session = {};
 
-    // this.push2object(session, this.options.div + '.coordinates.' + overlay.type + '.' + overlay.id, coordinates);
+    this.str2object(session, this.options.div + '.coordinates.' + overlay.type + '.' + overlay.id, coordinates);
+    // this.push2object(session, this.options.div + '.coordinates.' + overlay.type, coordinates);
+
     $.session.set(window.location.href, JSON.stringify(session));
 
+    // console.log(this.getCoordinatesSession());
     return session;
 };
 
