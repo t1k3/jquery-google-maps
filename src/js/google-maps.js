@@ -998,7 +998,7 @@ GoogleMaps.prototype.reset = function (objects) {
 
     // TODO Refactor
     self.resetCoordinatesSession();
-    var objects = objects || null;
+    let objects = objects || null;
     if (objects) {
         $.each(objects, function (index, value) {
             var obj = self.walkObject(self.objects, value);
