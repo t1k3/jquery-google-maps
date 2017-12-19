@@ -20,7 +20,7 @@ module.exports = {
         ]
     },
     plugins: [
-        new UglifyJSPlugin(),
+        // new UglifyJSPlugin(),
         new ExtractTextPlugin('css/google-maps.min.css'),
     ],
 };
