@@ -4,14 +4,7 @@ function GoogleMaps(options) {
 
     // initialize
     // document.getElementById('map'), $('#map');
-    this.map = new google.maps.Map($(this.options.div)[0], {
-        center: this.options.latlng,
-        zoom: this.options.zoom || 8,
-        mapTypeId: this.options.type || 'hybrid',
-        fullscreenControl: this.options.fullscreenControl,
-        streetViewControl: this.options.streetViewControl,
-        gestureHandling: this.options.gestureHandling,
-    });
+    this.map = new google.maps.Map($(this.options.div)[0], this.options);
 
     this.initBtns();
 };
@@ -20,6 +13,10 @@ GoogleMaps.prototype.initOptions = function (options) {
     this.options = options;
 
     this.options.latlng = typeof options.latlng !== 'undefined' ? options.latlng : {lat: 47.1556941, lng: 18.3847734};
+
+    this.options.center = this.options.latlng;
+    this.options.zoom = typeof options.zoom !== 'undefined' ? options.zoom : 8;
+    this.options.mapTypeId = typeof options.type !== 'undefined' ? options.type : 'hybrid';
 
     this.options.hideCustomMarkers = typeof options.hideCustomMarkers !== 'undefined' ? options.hideCustomMarkers : false;
 
@@ -538,22 +535,18 @@ GoogleMaps.prototype.addMarkerEvents = function (marker, callback) {
 // Add polygon
 GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     let self = this;
+
     options = options || {};
+    options.path = this.coordinates2paths(coordinates);
     options.to = options.to || 'polygons';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
+    options.strokeColor = options.strokeColor || '#1ab394';
+    options.strokeOpacity = options.strokeOpacity || 0.8;
+    options.strokeWeight = options.strokeWeight || 2;
+    options.fillColor = options.fillColor || '#1ab394';
+    options.fillOpacity = options.fillOpacity || 0.35;
 
-    let paths = this.coordinates2paths(coordinates);
-    let polygon = new google.maps.Polygon({
-        paths: paths,
-        strokeColor: options.strokeColor || '#1ab394',
-        strokeOpacity: options.strokeOpacity || 0.8,
-        strokeWeight: options.strokeWeight || 2,
-        fillColor: options.fillColor || '#1ab394',
-        fillOpacity: options.fillOpacity || 0.35,
-        draggable: options.draggable || false,
-        editable: options.editable || false,
-        zIndex: options.zIndex || 1,
-    });
+    let polygon = new google.maps.Polygon(options);
     polygon.id = options.id || self.guid();
     polygon.type = options.type || 'polygon';
     polygon.deletable = options.deletable || false;
@@ -564,7 +557,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     this.push2object(self.objects, options.to, polygon);
 
     if (options.bounds) {
-        $.each(paths, function (index, val) {
+        $.each(options.paths, function (index, val) {
             self.bounds.extend(val);
         });
     }
@@ -627,28 +620,24 @@ GoogleMaps.prototype.addPolygonEvents = function (polygon, callback) {
 
 GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     let self = this;
+
     options = options || {};
+    options.paths = this.coordinates2paths(coordinates);
     options.to = options.to || 'polylines';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
+    options.strokeColor = options.strokeColor || '#1ab394';
+    options.strokeOpacity = options.strokeOpacity || 0.8;
+    options.strokeWeight = options.strokeWeight || 2;
 
-    if (options.icons == 'arrow') {
+    if (options.icons === 'arrow') {
         options.icons = [{
             icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
             offset: '100%',
         }];
     }
 
-    let paths = this.coordinates2paths(coordinates);
-    let polyline = new google.maps.Polyline({
-        path: paths,
-        strokeColor: options.strokeColor || '#1ab394',
-        strokeOpacity: options.strokeOpacity || 0.8,
-        strokeWeight: options.strokeWeight || 2,
-        draggable: options.draggable || false,
-        editable: options.editable || false,
-        icons: options.icons ? options.icons : '',
-        zIndex: options.zIndex || 1,
-    });
+    let polyline = new google.maps.Polyline(options);
+
     polyline.id = options.id || self.guid();
     polyline.type = options.type || 'polyline';
     polyline.deletable = options.deletable || false;
@@ -659,7 +648,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     this.push2object(self.objects, options.to, polyline);
 
     if (options.bounds) {
-        $.each(paths, function (index, val) {
+        $.each(options.paths, function (index, val) {
             self.bounds.extend(val);
         });
     }
@@ -761,11 +750,13 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
     options = options || {};
     options.drawingModes = options.drawingModes || ['marker', 'polygon'];
 
+    // markerOptions
     options.markerOptions = options.markerOptions || {};
-    options.markerOptions.icon = options.markerOptions.icon || '';
+    options.markerOptions.icon = typeof options.markerOptions.icon !== 'undefined' ? options.markerOptions.icon : 'https://maps.google.com/mapfiles/ms/micons/red.png';
+    options.markerOptions.draggable = typeof options.markerOptions.draggable !== 'undefined' ? options.markerOptions.draggable : true;
 
-    options.polygonOptions = options.polygonOptions || {};
-    options.polylineOptions = options.polylineOptions || {};
+    options.markerOptions.max = options.markerOptions.max || null;
+    options.markerOptions.callback = options.markerOptions.callback || null;
 
     if (typeof options.markerOptions.icon === 'string' && options.markerOptions.icon !== '') {
         let markerIcon = options.markerOptions.icon;
@@ -778,13 +769,39 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         };
     }
 
-    if (options.polylineOptions.icons == 'arrow') {
+    // polygonOptions
+    options.polygonOptions = options.polygonOptions || {};
+    options.polygonOptions.strokeColor = options.polygonOptions.strokeColor || '#F75C54';
+    options.polygonOptions.strokeOpacity = 0.9;
+    options.polygonOptions.strokeWeight = 2;
+    options.polygonOptions.fillColor = options.polygonOptions.fillColor || '#F75C54';
+    options.polygonOptions.fillOpacity = 0.35;
+    options.polygonOptions.editable = true;
+    options.polygonOptions.zIndex = options.polygonOptions.zIndex || 1;
+
+    options.polygonOptions.max = options.polygonOptions.max || null;
+    options.polygonOptions.callback = options.polygonOptions.callback || null;
+
+    // polylineOptions
+    options.polylineOptions = options.polylineOptions || {};
+    options.polylineOptions.strokeColor = options.polylineOptions.strokeColor || '#F75C54';
+    options.polylineOptions.strokeOpacity = 0.9;
+    options.polylineOptions.strokeWeight = 2;
+    options.polylineOptions.editable = true;
+    // options.polylineOptions.draggable = options.polylineOptions.draggable || false;
+    options.polylineOptions.icons = options.polylineOptions.icons || null;
+    options.polylineOptions.zIndex = options.polylineOptions.zIndex || 1;
+    options.polylineOptions.max = options.polylineOptions.max || null;
+    options.polylineOptions.callback = options.polylineOptions.callback || null;
+
+    if (options.polylineOptions.icons === 'arrow') {
         options.polylineOptions.icons = [{
             icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
             offset: '100%',
         }];
     }
 
+    // options
     $.each(options.drawingModes, function (index, value) {
         let exists = typeof self.objects.customDraws[value] !== 'undefined';
         if (exists) {
@@ -797,50 +814,14 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         }
     });
 
-    self.drawingManager = new google.maps.drawing.DrawingManager({
-        // drawingMode: google.maps.drawing.OverlayType.MARKER,
-        drawingMode: options.drawingModes[0],
-        drawingModeOptions: options.drawingModeOptions,
-        drawingControl: true,
-        drawingControlOptions: {
-            position: google.maps.ControlPosition.TOP_CENTER,
-            drawingModes: options.drawingModes
-        },
-        markerOptions: {
-            draggable: true,
-            icon: options.markerOptions.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png',
-            zIndex: options.markerOptions.zIndex || 1,
+    options.drawingMode = options.drawingModes[0];
+    options.drawingControl = true;
+    options.drawingControlOptions = {
+        position: google.maps.ControlPosition.TOP_CENTER,
+        drawingModes: options.drawingModes
+    };
 
-            max: options.markerOptions.max || null,
-            callback: options.markerOptions.callback || null
-        },
-        polygonOptions: {
-            strokeColor: options.polygonOptions.strokeColor || '#F75C54',
-            strokeOpacity: 0.9,
-            strokeWeight: 2,
-            fillColor: options.polygonOptions.fillColor || '#F75C54',
-            fillOpacity: 0.35,
-            editable: true,
-            draggable: options.polygonOptions.draggable || false,
-            zIndex: options.polygonOptions.zIndex || 1,
-
-            max: options.polygonOptions.max || null,
-            callback: options.polygonOptions.callback || null
-        },
-        polylineOptions: {
-            strokeColor: options.polylineOptions.strokeColor || '#F75C54',
-            strokeOpacity: 0.9,
-            strokeWeight: 2,
-            editable: true,
-            draggable: options.polylineOptions.draggable || false,
-            icons: options.polylineOptions.icons || null,
-            zIndex: options.polylineOptions.zIndex || 1,
-
-            max: options.polylineOptions.max || null,
-            callback: options.polylineOptions.callback || null
-        },
-
-    });
+    self.drawingManager = new google.maps.drawing.DrawingManager(options);
     self.drawingManager.setMap(this.map);
 
     if (typeof options.drawingControl !== 'undefined' && !options.drawingControl) {
