@@ -491,6 +491,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
             icon: options.icon, // 'https://maps.google.com/mapfiles/ms/micons/green.png',
             visible: typeof options.visible !== 'undefined' ? options.visible : true,
             label: options.label,
+            zIndex: options.zIndex || 1,
         });
         marker.id = options.id || self.guid();
         marker.type = options.type || 'marker';
@@ -550,7 +551,8 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
         fillColor: options.fillColor || '#1ab394',
         fillOpacity: options.fillOpacity || 0.35,
         draggable: options.draggable || false,
-        editable: options.editable || false
+        editable: options.editable || false,
+        zIndex: options.zIndex || 1,
     });
     polygon.id = options.id || self.guid();
     polygon.type = options.type || 'polygon';
@@ -645,6 +647,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
         draggable: options.draggable || false,
         editable: options.editable || false,
         icons: options.icons ? options.icons : '',
+        zIndex: options.zIndex || 1,
     });
     polyline.id = options.id || self.guid();
     polyline.type = options.type || 'polyline';
@@ -806,6 +809,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
         markerOptions: {
             draggable: true,
             icon: options.markerOptions.icon || 'https://maps.google.com/mapfiles/ms/micons/red.png',
+            zIndex: options.markerOptions.zIndex || 1,
 
             max: options.markerOptions.max || null,
             callback: options.markerOptions.callback || null
@@ -818,7 +822,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             fillOpacity: 0.35,
             editable: true,
             draggable: options.polygonOptions.draggable || false,
-            zIndex: 1,
+            zIndex: options.polygonOptions.zIndex || 1,
 
             max: options.polygonOptions.max || null,
             callback: options.polygonOptions.callback || null
@@ -830,6 +834,7 @@ GoogleMaps.prototype.addDrawingManager = function (options) {
             editable: true,
             draggable: options.polylineOptions.draggable || false,
             icons: options.polylineOptions.icons || null,
+            zIndex: options.polylineOptions.zIndex || 1,
 
             max: options.polylineOptions.max || null,
             callback: options.polylineOptions.callback || null
