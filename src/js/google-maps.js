@@ -233,10 +233,11 @@ GoogleMaps.prototype.print = function () {
 
     let $patchedStyle = $('<style media="print" id="gmaps-print-style">')
         .text(
-            'img { max-width: none !important; }' +
-            'img.gm-fullscreen-control { display: none !important; }' +
-            'a[href]:after { content: ""; }' +
-            '.btn-gmaps { display: none !important; }' +
+            // 'img { max-width: none !important; }' +
+            // 'img.gm-fullscreen-control { display: none !important; }' +
+            // 'a[href]:after { content: ""; }' +
+            // '.btn-gmaps { display: none !important; }' +
+            // '.custom-marker { -webkit-filter: drop-shadow(-1px 0 #fff); text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff; }' +
             this.options.div + ' { width: 100%; height: 100%; }'
         )
         .appendTo('head');
