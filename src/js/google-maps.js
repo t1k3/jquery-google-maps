@@ -622,7 +622,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     let self = this;
 
     options = options || {};
-    options.paths = this.coordinates2paths(coordinates);
+    options.path = this.coordinates2paths(coordinates);
     options.to = options.to || 'polylines';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
     options.strokeColor = options.strokeColor || '#1ab394';
@@ -648,7 +648,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     this.push2object(self.objects, options.to, polyline);
 
     if (options.bounds) {
-        $.each(options.paths, function (index, val) {
+        $.each(options.path, function (index, val) {
             self.bounds.extend(val);
         });
     }
