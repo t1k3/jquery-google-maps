@@ -976,7 +976,6 @@ GoogleMaps.prototype.setCoordinatesSession = function (overlay, coordinates) {
 
     $.session.set(window.location.href, JSON.stringify(session));
 
-    // console.log(this.getCoordinatesSession());
     return session;
 };
 
@@ -986,11 +985,11 @@ GoogleMaps.prototype.resetCoordinatesSession = function (id, type) {
     if (typeof type !== 'undefined' && typeof id !== 'undefined') {
         let exists = this.objectIsExists(session, [this.options.div, 'coordinates', type, id]);
         if (exists) delete session[this.options.div]['coordinates'][type][id];
-
     } else {
         let exists = this.objectIsExists(session, [this.options.div, 'coordinates']);
         if (exists) delete session[this.options.div]['coordinates'];
     }
+
     $.session.set(window.location.href, JSON.stringify(session));
 };
 
