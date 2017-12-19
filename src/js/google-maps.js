@@ -537,7 +537,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     let self = this;
 
     options = options || {};
-    options.path = this.coordinates2paths(coordinates);
+    options.paths = this.coordinates2paths(coordinates);
     options.to = options.to || 'polygons';
     options.bounds = typeof options.bounds !== 'undefined' ? options.bounds : true;
     options.strokeColor = options.strokeColor || '#1ab394';
