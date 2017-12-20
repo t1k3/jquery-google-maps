@@ -10,17 +10,17 @@ google.maps.Polygon.prototype.getBounds = google.maps.Polyline.prototype.getBoun
 
 // Add center calculation method
 google.maps.Polygon.prototype.getApproximateCenter = google.maps.Polyline.prototype.getApproximateCenter = function () {
-    let boundsHeight = 0,
-        boundsWidth = 0,
-        centerPoint,
-        heightIncr = 0,
-        maxSearchLoops,
-        maxSearchSteps = 10,
-        n = 1,
-        northWest,
-        polygonBounds = this.getBounds(),
-        testPos,
-        widthIncr = 0;
+    let boundsHeight = 0;
+    let boundsWidth = 0;
+    let centerPoint;
+    let heightIncr = 0;
+    let maxSearchLoops;
+    let maxSearchSteps = 10;
+    let n = 1;
+    let northWest;
+    let polygonBounds = this.getBounds();
+    let testPos;
+    let widthIncr = 0;
 
     // Get polygon Centroid
     centerPoint = polygonBounds.getCenter();
