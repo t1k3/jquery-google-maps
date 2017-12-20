@@ -305,22 +305,18 @@ GoogleMaps.prototype.setLocation = function (options) {
                 let latlng = {lat: position.coords.latitude, lng: position.coords.longitude};
 
                 if (typeof options.markerOptions !== 'undefined') {
-                    options.markerOptions.to = options.markerOptions.to || 'customDraws.markers';
+                    options.markerOptions.to = options.markerOptions.to || 'customDraws.marker';
                     options.markerOptions.icon = typeof options.markerOptions.icon !== 'undefined' ? options.icon : 'https://maps.google.com/mapfiles/ms/micons/blue.png';
                     options.markerOptions.draggable = options.markerOptions.draggable || false;
+                    options.markerOptions.id = options.markerOptions.id || self.guid();
+                    options.markerOptions.type = options.markerOptions.type || 'marker';
 
-                    let marker = self.addMarker(latlng, {
-                        to: options.markerOptions.to,
-                        draggable: options.markerOptions.draggable,
-                        icon: options.markerOptions.icon,
-
-                        id: self.guid(),
-                        type: 'marker',
-                    });
+                    let marker = self.addMarker(latlng, options.markerOptions);
 
                     self.addDrawingManager({
                         drawingModes: ['marker'],
                         drawingControl: false,
+                        markerOptions: options.markerOptions,
                     });
 
                     if (typeof options.markerOptions.callback !== 'function') {
