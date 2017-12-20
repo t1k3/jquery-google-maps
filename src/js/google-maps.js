@@ -7,7 +7,7 @@ function GoogleMaps(options) {
     this.map = new google.maps.Map($(this.options.div)[0], this.options);
 
     this.initBtns();
-};
+}
 
 GoogleMaps.prototype.initOptions = function (options) {
     this.options = options;
@@ -126,7 +126,7 @@ GoogleMaps.prototype.initBtns = function () {
         let object = self.objects.customDraws[type];
 
         $.each(object, function (index, value) {
-            if (value && value.id == id) {
+            if (value && value.id === id) {
                 self.resetDrawingManagerInput(id);
                 self.resetCoordinatesSession(id, type);
                 object[index].setMap(null);
@@ -283,7 +283,9 @@ GoogleMaps.prototype.getSize = function (polygon) {
 // Set polygon size to input
 GoogleMaps.prototype.setSizeInput = function (m2) {
     let ha = parseInt(m2 / 10000);
-    if ($('[name=size]').length) $('[name=size]').val(ha);
+    let $input = $('[name=size]');
+
+    if ($input.length) $input.val(ha);
 };
 
 // Reset polygon size input
@@ -865,7 +867,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager) {
                     overlay.callback = function (overlay) {
                         self.setDrawingManagerInput(overlay);
 
-                        let m2 = self.getSize(overlay)
+                        let m2 = self.getSize(overlay);
                         self.setSizeInput(m2);
                     }
                 }
@@ -1001,7 +1003,7 @@ GoogleMaps.prototype.reset = function (objects) {
     objects = objects || null;
     if (objects) {
         $.each(objects, function (index, value) {
-            var obj = self.walkObject(self.objects, value);
+            let obj = self.walkObject(self.objects, value);
             if (obj) {
                 self.resetObject(obj);
                 self.objects[value] = [];

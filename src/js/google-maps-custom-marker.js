@@ -1,20 +1,21 @@
 function CustomMarker(latlng, map, options) {
-    this.latlng  = latlng;
+    this.latlng = latlng;
     this.options = options;
     this.setMap(map);
 };
 
 CustomMarker.prototype = new google.maps.OverlayView();
 
-CustomMarker.prototype.draw = function() {
+CustomMarker.prototype.draw = function () {
 
-    var self = this;
-    var div  = this.div;
+    let self = this;
+    let div = this.div;
 
     if (!div) {
         div = this.div = document.createElement('div');
 
-        $(div).css({
+        $(div)
+            .css({
                 position: 'absolute',
                 top: 0,
                 left: 0
@@ -28,15 +29,15 @@ CustomMarker.prototype.draw = function() {
             $(div).addClass(self.options.class);
         }
 
-        google.maps.event.addDomListener(div, "click", function(event) {
+        google.maps.event.addDomListener(div, "click", function () {
             google.maps.event.trigger(self, "click");
         });
 
-        var panes = this.getPanes();
+        let panes = this.getPanes();
         panes.overlayImage.appendChild(div);
     }
 
-    var point = this.getProjection().fromLatLngToDivPixel(this.latlng);
+    let point = this.getProjection().fromLatLngToDivPixel(this.latlng);
 
     if (point) {
         div.style.left = point.x + 'px';
@@ -44,14 +45,14 @@ CustomMarker.prototype.draw = function() {
     }
 };
 
-CustomMarker.prototype.remove = function() {
+CustomMarker.prototype.remove = function () {
     if (this.div) {
         this.div.parentNode.removeChild(this.div);
         this.div = null;
     }
 };
 
-CustomMarker.prototype.getPosition = function() {
+CustomMarker.prototype.getPosition = function () {
     return this.latlng;
 };
 
