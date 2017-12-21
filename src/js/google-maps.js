@@ -345,6 +345,7 @@ GoogleMaps.prototype.setLocation = function (options) {
                 self.addDrawingManager({
                     drawingModes: ['marker'],
                     drawingControl: true,
+                    markerOptions: options.markerOptions,
                 });
             }
         );
