@@ -947,7 +947,12 @@ GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
 GoogleMaps.prototype.getCoordinatesSession = function () {
     let session = $.session.get(window.location.href);
     if (typeof session !== 'undefined') {
-        session = JSON.parse($.session.get(window.location.href));
+        try {
+            session = JSON.parse($.session.get(window.location.href));
+        } catch (e) {
+            session = null;
+            console.log(e);
+        }
     }
 
     return session;
