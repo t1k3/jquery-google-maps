@@ -1,8 +1,10 @@
+"use strict";
+
 function CustomMarker(latlng, map, options) {
     this.latlng = latlng;
     this.options = options;
     this.setMap(map);
-};
+}
 
 CustomMarker.prototype = new google.maps.OverlayView();
 

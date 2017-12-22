@@ -1,3 +1,5 @@
+"use strict";
+
 function GoogleMaps(options) {
     this.initOptions(options);
     this.initVariables();
@@ -903,7 +905,7 @@ GoogleMaps.prototype.addDrawingManagerEvents = function (drawingManager) {
 GoogleMaps.prototype.addOverlayDeleteEvent = function (overlay) {
     let self = this;
     google.maps.event.addListener(overlay, 'click', function () {
-        $reset = $(self.options.div).find('#draw-reset');
+        let $reset = $(self.options.div).find('#draw-reset');
 
         $reset.attr('data-id', overlay.id);
         $reset.attr('data-object', overlay.type);

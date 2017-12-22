@@ -1,3 +1,5 @@
+"use strict";
+
 // Add custom getBounds method
 google.maps.Polygon.prototype.getBounds = google.maps.Polyline.prototype.getBounds = function () {
     let bounds = new google.maps.LatLngBounds();
