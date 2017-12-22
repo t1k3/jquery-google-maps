@@ -7,7 +7,7 @@
     "google-maps",
     "gmaps"
   ],
-  "main": "dist/js/google-maps.min.js",
+  "main": "./dist/js/google-maps.min.js",
   "dependencies": {
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
