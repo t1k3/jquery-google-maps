@@ -1,5 +1,4 @@
 const path = require('path');
-const BabiliWebpackPlugin = require('babel-minify-webpack-plugin');
 const UglifyWebpackPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -23,8 +22,7 @@ module.exports = {
         ]
     },
     plugins: [
-        // new UglifyWebpackPlugin(),
-        new BabiliWebpackPlugin(),
+        new UglifyWebpackPlugin(),
         new ExtractTextPlugin('css/google-maps.min.css'),
     ],
 };
