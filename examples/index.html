@@ -112,6 +112,10 @@
             editable: true,
         });
 
+        gmaps.addMarker(coordinates, {
+            infoWindow: 'Marker for Polygon center'
+        });
+
         gmaps.fitZoom();
     };
     var initPolyline = function (gmaps) {

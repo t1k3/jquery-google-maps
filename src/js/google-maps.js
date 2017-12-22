@@ -454,6 +454,7 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
     let self = this;
     let marker = null;
 
+    options = options || {};
     options.icon = options.icon || '';
 
     if (typeof latlng.lat === 'undefined') {

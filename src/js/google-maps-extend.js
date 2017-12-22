@@ -72,8 +72,8 @@ let getApproximateCenter = function () {
 };
 
 // Add custom getBounds method
-google.maps.Polygon.prototype.getBounds = getBounds;
-google.maps.Polyline.prototype.getBounds = getBounds;
+if (typeof google.maps.Polygon.prototype.getBounds === 'undefined') google.maps.Polygon.prototype.getBounds = getBounds;
+if (typeof google.maps.Polyline.prototype.getBounds === 'undefined') google.maps.Polyline.prototype.getBounds = getBounds;
 
 // Add center calculation method
 google.maps.Polygon.prototype.getApproximateCenter = getApproximateCenter;
