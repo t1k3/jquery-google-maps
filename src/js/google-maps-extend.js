@@ -1,7 +1,6 @@
 "use strict";
 
-// Add custom getBounds method
-google.maps.Polygon.prototype.getBounds = google.maps.Polyline.prototype.getBounds = function () {
+let getBounds = function () {
     let bounds = new google.maps.LatLngBounds();
     this.getPath().forEach(function (element, index) {
         bounds.extend(element);
@@ -10,8 +9,7 @@ google.maps.Polygon.prototype.getBounds = google.maps.Polyline.prototype.getBoun
     return bounds;
 };
 
-// Add center calculation method
-google.maps.Polygon.prototype.getApproximateCenter = google.maps.Polyline.prototype.getApproximateCenter = function () {
+let getApproximateCenter = function () {
     let boundsHeight = 0;
     let boundsWidth = 0;
     let centerPoint;
@@ -72,3 +70,11 @@ google.maps.Polygon.prototype.getApproximateCenter = google.maps.Polyline.protot
         return (testPos);
     }
 };
+
+// Add custom getBounds method
+google.maps.Polygon.prototype.getBounds = getBounds;
+google.maps.Polyline.prototype.getBounds = getBounds;
+
+// Add center calculation method
+google.maps.Polygon.prototype.getApproximateCenter = getApproximateCenter;
+google.maps.Polyline.prototype.getApproximateCenter = getApproximateCenter;
