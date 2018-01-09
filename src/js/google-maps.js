@@ -926,7 +926,6 @@ GoogleMaps.prototype.addOverlayDeleteEvent = function (overlay) {
         $reset.show();
     });
 
-    console.log('addOverlayDeleteEvent', overlay.callback);
     if (typeof overlay.callback === 'function') overlay.callback(overlay);
 };
 
