@@ -129,7 +129,8 @@ GoogleMaps.prototype.initBtns = function () {
 
         $.each(object, function (index, value) {
             if (value && value.id === id) {
-                if(typeof value.callback === 'function') {
+                value.getPath = null;
+                if (typeof value.callback === 'function') {
                     value.callback(value);
                 }
 
@@ -265,7 +266,7 @@ GoogleMaps.prototype.getRandomPoint = function (coordinate) {
 
     let bounds = new google.maps.LatLngBounds();
     for (let i = 0; i < polygon.getPath().getLength(); i++) {
-        bounds.extend(polygon.getPath().getAt(i));
+        if (typeof polygon.getPath === 'function') bounds.extend(polygon.getPath().getAt(i));
     }
 
     let sw = bounds.getSouthWest();
@@ -283,7 +284,8 @@ GoogleMaps.prototype.getRandomPoint = function (coordinate) {
 
 // Get polygon size
 GoogleMaps.prototype.getSize = function (polygon) {
-    return google.maps.geometry.spherical.computeArea(polygon.getPath());
+    if (typeof polygon.getPath === 'function') return google.maps.geometry.spherical.computeArea(polygon.getPath());
+    else return null;
 };
 
 // Set polygon size to input

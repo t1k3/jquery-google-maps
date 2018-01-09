@@ -112,9 +112,14 @@
             editable: true,
             deletable: true,
             to: 'customDraws.polygon',
-            // callback: function () {
-            //     console.log('Callback test');
-            // }
+            callback: function (polygon) {
+                console.log('Callback test');
+
+                let coordinates = typeof polygon.getPath === 'function' ? polygon.getPath().getArray() : null;
+                let m2 = gmaps.getSize(polygon);
+
+                console.log(polygon, coordinates, m2);
+            }
         });
 
         gmaps.addMarker(coordinates, {
