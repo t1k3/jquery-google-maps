@@ -129,6 +129,10 @@ GoogleMaps.prototype.initBtns = function () {
 
         $.each(object, function (index, value) {
             if (value && value.id === id) {
+                if(typeof value.callback === 'function') {
+                    value.callback(value);
+                }
+
                 self.resetDrawingManagerInput(id);
                 self.resetCoordinatesSession(id, type);
                 object[index].setMap(null);
@@ -911,7 +915,6 @@ GoogleMaps.prototype.addOverlayDeleteEvent = function (overlay) {
         $reset.attr('data-id', overlay.id);
         $reset.attr('data-object', overlay.type);
         $reset.show();
-
     });
     if (typeof overlay.callback === 'function') overlay.callback(overlay);
 };
