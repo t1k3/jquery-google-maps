@@ -19,9 +19,6 @@
 <div id="app">
     <!--Canvas of Google Maps-->
     <div id="map-canvas" class="gmaps"></div>
-    <div id="map-canvas-polygon" class="gmaps"></div>
-    <div id="map-canvas-draw" class="gmaps"></div>
-    <div id="map-canvas-location" class="gmaps"></div>
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=&libraries=geometry,drawing"></script>
@@ -32,43 +29,6 @@
 <script src="../dist/js/google-maps.min.js"></script>
 
 <script>
-    var initMarkers = function (gmaps) {
-        var markerLatLng = {lat: 47.50706, lng: 19.047991};
-        gmaps.addMarker(markerLatLng, {
-            infoWindow: "<b>Palace of Parliament Hungary</b><br>Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            to: 'markers.customPlaces'
-        });
-        gmaps.setPanorama(markerLatLng);
-//        gmaps.setCenter(markerLatLng);
-//        gmaps.setZoom(16);
-
-//        For marker cluster
-        gmaps.addMarker({lat: 47.50706, lng: 19.046351}, {
-            infoWindow: 'For marker cluster',
-            to: 'markers.customPlaces',
-            label: 'Marker label',
-        });
-
-//        For marker (not) cluster(ed)
-        gmaps.addMarker({lat: 47.508, lng: 19.0464}, {
-            infoWindow: 'For marker (not) cluster',
-            to: 'markers.places',
-        });
-
-        gmaps.addMarker({lat: 47.508, lng: 20.0464}, {
-            infoWindow: 'editMarker',
-            to: 'customDraws.marker',
-            draggable: true,
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 10
-            },
-        });
-
-        gmaps.addMarkerCluster();
-        gmaps.fitZoom();
-    };
-
     var initPolygon = function (gmaps) {
         var coordinates = [
             [48.42191, 22.126465],
@@ -131,9 +91,11 @@
 
         gmaps.fitZoom();
     };
+
     var initPolyline = function (gmaps) {
         var coordinates = [[48.210032122340415, 26.806640625], [44.22945656830167, 22.7197265625]];
         gmaps.addPolyline(coordinates, {
+            to: 'customDraws.polyline',
             strokeColor: 'red',
             label: '<div class="custom-marker">Label for Transylvania Polyline</div>',
             infoWindow: 'InfoWindow for Transylvania Polyline',
@@ -144,23 +106,23 @@
         });
     };
 
-    var callback = function (marker) {
-        console.log(marker.id, marker.getPosition().lat(), marker.getPosition().lng());
-    };
     var initDrawingManager = function (gmaps) {
 //        gmaps.resetDrawingManager();
         gmaps.addDrawingManager({
             drawingModes: ['marker', 'polygon', 'polyline'],
             markerOptions: {
-                max: 3,
+                max: 1,
                 zIndex: 5,
                 /*icon: {
                     path: google.maps.SymbolPath.CIRCLE,
                     scale: 5
                 },*/
-                // callback: callback
+                callback: function () {
+                    console.log('DrawingManager Marker Callback');
+                }
             },
             polylineOptions: {
+                max: 2,
                 zIndex: 1,
                 strokeColor: 'black',
 //                icons: 'arrow',
@@ -184,23 +146,6 @@
             locationable: true,
             streetviewable: true,
             printable: true,
-            fitzoomable: true,
-
-            gestureHandling: "greedy", // "none", "greedy", "cooperative"
-            fullscreenControl: true,
-            streetViewControl: true,
-        });
-        initMarkers(gmaps);
-
-        var gmapsPolygon = new GoogleMaps({
-            div: "#map-canvas-polygon",
-//            latlng: {lat: 47.157562, lng: 18.3847344},
-            zoom: 8,
-            type: "roadmap",
-
-            locationable: true,
-            streetviewable: true,
-            printable: true,
 
             gestureHandling: "greedy", // "none", "greedy", "cooperative"
             fullscreenControl: true,
@@ -208,50 +153,9 @@
 
             hideCustomMarkers: false,
         });
-        initPolygon(gmapsPolygon);
-        initPolyline(gmapsPolygon);
-
-        // draw
-        var gmapsDraw = new GoogleMaps({
-            div: "#map-canvas-draw",
-//            latlng: {lat: 47.157562, lng: 18.3847344},
-            zoom: 8,
-            type: "roadmap",
-
-            locationable: true,
-            streetviewable: true,
-            printable: true,
-
-            gestureHandling: "greedy", // "none", "greedy", "cooperative"
-            fullscreenControl: true,
-            streetViewControl: true,
-        });
-        initDrawingManager(gmapsDraw);
-
-        // location
-        var gmapsLocation = new GoogleMaps({
-            div: "#map-canvas-location",
-//            latlng: {lat: 47.157562, lng: 18.3847344},
-            zoom: 8,
-            type: "roadmap",
-
-            locationable: true,
-            streetviewable: true,
-            printable: true,
-
-            gestureHandling: "greedy", // "none", "greedy", "cooperative"
-            fullscreenControl: true,
-            streetViewControl: true,
-        });
-        gmapsLocation.setLocation({
-            callback: function (latlng) {
-                console.log('setLocation callback', latlng);
-            },
-            markerOptions: {
-                to: 'customDraws.marker',
-                draggable: true,
-            }
-        });
+        initPolygon(gmaps);
+        initPolyline(gmaps);
+        initDrawingManager(gmaps);
     });
 </script>
 </body>

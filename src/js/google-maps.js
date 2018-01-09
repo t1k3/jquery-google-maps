@@ -504,6 +504,9 @@ GoogleMaps.prototype.addMarker = function (latlng, options) {
         marker.id = options.id || self.guid();
         marker.type = options.type || 'marker';
         marker.deletable = options.deletable || false;
+        marker.callback = options.callback;
+
+        marker.setMap(this.map);
 
         // this.objects.markers.push(marker);
         // this.objects.markers[options.to].push(marker);
@@ -561,6 +564,7 @@ GoogleMaps.prototype.addPolygon = function (coordinates, options) {
     polygon.id = options.id || self.guid();
     polygon.type = options.type || 'polygon';
     polygon.deletable = options.deletable || false;
+    polygon.callback = options.callback;
 
     polygon.setMap(this.map);
 
@@ -652,6 +656,7 @@ GoogleMaps.prototype.addPolyline = function (coordinates, options) {
     polyline.id = options.id || self.guid();
     polyline.type = options.type || 'polyline';
     polyline.deletable = options.deletable || false;
+    polyline.callback = options.callback;
 
     polyline.setMap(this.map);
 
@@ -920,6 +925,8 @@ GoogleMaps.prototype.addOverlayDeleteEvent = function (overlay) {
         $reset.attr('data-object', overlay.type);
         $reset.show();
     });
+
+    console.log('addOverlayDeleteEvent', overlay.callback);
     if (typeof overlay.callback === 'function') overlay.callback(overlay);
 };
 
@@ -929,11 +936,15 @@ GoogleMaps.prototype.setDrawingManagerInput = function (overlay) {
     let coordinates = null;
     switch (overlay.type) {
         case 'marker':
-            coordinates = '(' + overlay.getPosition().lat() + ', ' + overlay.getPosition().lng() + ')';
+            if (typeof overlay.getPosition === 'function') {
+                coordinates = '(' + overlay.getPosition().lat() + ', ' + overlay.getPosition().lng() + ')';
+            }
             break;
         case 'polygon':
         case 'polyline':
-            coordinates = overlay.getPath().getArray();
+            if (typeof overlay.getPath === 'function') {
+                coordinates = overlay.getPath().getArray();
+            }
             break;
     }
     let $input = $(self.options.div + ' input[data-id="' + overlay.id + '"]');
@@ -970,7 +981,7 @@ GoogleMaps.prototype.getCoordinatesSession = function () {
 
 GoogleMaps.prototype.setCoordinatesSession = function (overlay, coordinates) {
     let session = this.getCoordinatesSession();
-    if (typeof session === 'undefined') session = {};
+    if (typeof session === 'undefined' || session === null) session = {};
 
     this.str2object(session, this.options.div + '.coordinates.' + overlay.type + '.' + overlay.id, coordinates);
     // this.push2object(session, this.options.div + '.coordinates.' + overlay.type, coordinates);
