@@ -130,6 +130,8 @@ GoogleMaps.prototype.initBtns = function () {
         $.each(object, function (index, value) {
             if (value && value.id === id) {
                 value.getPath = null;
+                value.getPosition = null;
+
                 if (typeof value.callback === 'function') {
                     value.callback(value);
                 }
