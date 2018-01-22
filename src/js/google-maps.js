@@ -1065,7 +1065,9 @@ GoogleMaps.prototype.resetObject = function (object) {
 
 // Reset drawing manager | reset
 GoogleMaps.prototype.resetDrawingManager = function () {
-    $(this.options.div).find('#draw-reset').remove();
+    let $reset = $(this.options.div).find('#draw-reset');
+    $reset.hide();
+
     if (this.drawingManager !== null) {
         this.drawingManager.setMap(null);
         this.drawingManager = null;
