@@ -1059,7 +1059,7 @@ GoogleMaps.prototype.reset = function (objects) {
 // Reset object | reset
 GoogleMaps.prototype.resetObject = function (object) {
     $.each(object, function (index, val) {
-        val.setMap(null);
+        if (val && typeof val.setMap === 'function') val.setMap(null);
     });
 };
 
