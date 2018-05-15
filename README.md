@@ -68,6 +68,3 @@ npm install --save-dev https://github.com/t1k3hu/jquery-google-maps
 - [ ] Documentation: Options
 - [ ] Documentation: Methods
 - [ ] Refactor
-
-## Credits
-* [T1k3](https://github.com/t1k3hu)
