@@ -1,5 +1,5 @@
 # Google Maps JS
-Work in progress
+Deprecated
 
 ## Installation
 ```bash
